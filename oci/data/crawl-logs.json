@@ -1,0 +1,69 @@
+{
+  "logs": [
+    {
+      "date": "2025-07-28",
+      "startTime": "2025-07-28T23:35:02",
+      "endTime": "2025-07-28T23:35:12",
+      "totalCrawled": 5,
+      "newRecords": 0,
+      "errorRecords": 5,
+      "status": "partial",
+      "message": "定時爬蟲V2執行 - 序號1114-1118全部失敗，可能已達最新序號"
+    },
+    {
+      "date": "2025-07-28", 
+      "startTime": "2025-07-28T23:25:01",
+      "endTime": "2025-07-28T23:25:32",
+      "totalCrawled": 14,
+      "newRecords": 9,
+      "errorRecords": 5,
+      "status": "completed",
+      "message": "定時爬蟲V2執行 - 成功爬取序號1101-1110共9筆新建照"
+    },
+    {
+      "date": "2025-07-28",
+      "startTime": "2025-07-28T23:20:01",
+      "endTime": "2025-07-28T23:20:03",
+      "totalCrawled": 1,
+      "newRecords": 1,
+      "errorRecords": 0,
+      "status": "completed",
+      "message": "定時爬蟲執行 - 成功爬取序號1100 (114中都建字第01100號)"
+    },
+    {
+      "date": "2025-07-28",
+      "startTime": "2025-07-28T17:00:00",
+      "endTime": "2025-07-28T21:50:00",
+      "totalCrawled": 3348,
+      "newRecords": 3348,
+      "errorRecords": 13,
+      "status": "completed",
+      "message": "完成三年份空白欄位大規模修復 - 112年:1235/1240(99.6%) 113年:1452/1456(99.7%) 114年:661/662(99.8%)"
+    },
+    {
+      "date": "2025-07-28",
+      "startTime": "2025-07-28T14:00:00",
+      "endTime": "2025-07-28T16:00:00",
+      "totalCrawled": 632,
+      "newRecords": 632,
+      "errorRecords": 0,
+      "status": "completed",
+      "message": "補齊缺失序號資料 - 112年:543筆 113年:89筆"
+    },
+    {
+      "date": "2025-07-27",
+      "startTime": "2025-07-27T11:08:31.063198",
+      "endTime": "2025-07-27T11:08:31.063200",
+      "totalCrawled": 0,
+      "newRecords": 0,
+      "errorRecords": 0,
+      "status": "data_cleaned",
+      "cleaningStats": {
+        "originalCount": 110,
+        "validCount": 0,
+        "removedCount": 110
+      },
+      "message": "資料清理完成，移除 110 筆無效記錄"
+    }
+  ]
+}

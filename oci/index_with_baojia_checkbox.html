@@ -1,0 +1,1995 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>台中市建築執照資料查詢系統</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: #f0f2f5;
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        /* 頁首樣式 */
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px 0;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            text-align: center;
+            font-size: 2.5em;
+            font-weight: 600;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        .subtitle {
+            text-align: center;
+            font-size: 1.1em;
+            opacity: 0.9;
+            margin-top: 10px;
+        }
+        
+        /* 統計卡片樣式 */
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            text-align: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.12);
+        }
+        
+        .stat-number {
+            font-size: 2.5em;
+            font-weight: 700;
+            color: #667eea;
+            margin-bottom: 5px;
+        }
+        
+        .stat-label {
+            color: #6b7280;
+            font-size: 0.9em;
+            font-weight: 500;
+        }
+        
+        /* 統計圖表容器 */
+        .chart-container {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            margin-bottom: 30px;
+        }
+        
+        .chart-title {
+            font-size: 1.3em;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: #374151;
+        }
+        
+        #yearChart {
+            max-width: 100%;
+            height: 300px;
+        }
+        
+        /* 主要內容區 */
+        .main-content {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        
+        /* 搜尋區域樣式 */
+        .search-section {
+            background: #f9fafb;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+        }
+        
+        .desktop-search-controls {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        
+        .search-input {
+            padding: 10px 15px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 0.95em;
+            flex: 1;
+            min-width: 200px;
+            transition: border-color 0.3s;
+        }
+        
+        .search-input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.95em;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #5a67d8;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+        
+        .btn-secondary {
+            background: #e5e7eb;
+            color: #374151;
+        }
+        
+        .btn-secondary:hover {
+            background: #d1d5db;
+        }
+        
+        .btn-success {
+            background: #10b981;
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background: #059669;
+        }
+        
+        .btn-export {
+            background: #f59e0b;
+            color: white;
+        }
+        
+        .btn-export:hover {
+            background: #d97706;
+        }
+        
+        /* 手機版搜尋按鈕 */
+        .mobile-search-btn {
+            display: none;
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #667eea;
+            color: white;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            border: none;
+            font-size: 1.5em;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            cursor: pointer;
+            z-index: 100;
+        }
+        
+        /* 搜尋面板 (手機版) */
+        .search-panel {
+            display: none;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            padding: 20px;
+            border-radius: 20px 20px 0 0;
+            box-shadow: 0 -4px 20px rgba(0,0,0,0.2);
+            z-index: 200;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        
+        .search-panel.active {
+            display: block;
+        }
+        
+        .search-panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .search-panel-title {
+            font-size: 1.2em;
+            font-weight: 600;
+        }
+        
+        .close-search-btn {
+            background: none;
+            border: none;
+            font-size: 1.5em;
+            cursor: pointer;
+            color: #6b7280;
+        }
+        
+        /* 篩選控制區 */
+        .filter-controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .filter-select {
+            padding: 8px 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 0.9em;
+            cursor: pointer;
+        }
+        
+        .filter-chip {
+            background: #e0e7ff;
+            color: #4338ca;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .filter-chip .remove {
+            cursor: pointer;
+            font-weight: bold;
+        }
+        
+        /* 匯出按鈕 */
+        .export-btn {
+            position: fixed;
+            bottom: 80px;
+            right: 20px;
+            background: #10b981;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 25px;
+            border: none;
+            font-size: 0.9em;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            z-index: 50;
+        }
+        
+        .export-btn:hover {
+            background: #059669;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+        
+        /* AI 搜尋容器 */
+        .ai-search-container {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            margin-left: 20px;
+            position: relative;
+        }
+        
+        .ai-search-input {
+            padding: 10px 15px;
+            border: 2px solid #667eea;
+            border-radius: 25px;
+            width: 300px;
+            font-size: 0.9em;
+            outline: none;
+            transition: all 0.3s;
+        }
+        
+        .ai-search-input:focus {
+            width: 350px;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .ai-search-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 0.9em;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: all 0.3s;
+            white-space: nowrap;
+        }
+        
+        .ai-search-btn:hover {
+            background: #5a67d8;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+        
+        .ai-search-btn:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+        }
+        
+        .ai-search-results {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            width: 100%;
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            margin-top: 5px;
+            padding: 10px;
+            display: none;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        
+        .ai-search-loading {
+            text-align: center;
+            color: #666;
+            padding: 20px;
+        }
+        
+        .filter-results {
+            padding: 10px 20px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e9ecef;
+            color: #666;
+            font-size: 0.9em;
+        }
+        
+        .permits-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .table-header {
+            background: #667eea;
+            color: white;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        
+        .table-header th {
+            padding: 12px 8px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 0.9em;
+            cursor: pointer;
+            user-select: none;
+            border-right: 1px solid rgba(255,255,255,0.2);
+        }
+        
+        .table-header th:hover {
+            background: rgba(255,255,255,0.1);
+        }
+        
+        .table-header th.sortable::after {
+            content: " ↕";
+            opacity: 0.5;
+        }
+        
+        .table-header th.sort-asc::after {
+            content: " ↑";
+            opacity: 1;
+        }
+        
+        .table-header th.sort-desc::after {
+            content: " ↓";
+            opacity: 1;
+        }
+        
+        .table-header th.clickable {
+            position: relative;
+        }
+        
+        .table-header th.clickable::before {
+            content: "🔍";
+            position: absolute;
+            right: 5px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 0.7em;
+            opacity: 0.7;
+        }
+        
+        .table-row {
+            border-bottom: 1px solid #e9ecef;
+            transition: background-color 0.2s ease;
+        }
+        
+        .table-row:hover {
+            background: #f8f9fa;
+        }
+        
+        .table-row td {
+            padding: 12px 8px;
+            font-size: 0.9em;
+        }
+        
+        .permit-number {
+            font-weight: 600;
+            color: #4338ca;
+        }
+        
+        .applicant-name {
+            max-width: 200px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        
+        .address {
+            max-width: 250px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            font-size: 0.85em;
+            color: #6b7280;
+        }
+        
+        .highlight {
+            background-color: #fef3c7;
+            padding: 2px 4px;
+            border-radius: 3px;
+        }
+        
+        /* 分頁控制 */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .pagination button {
+            padding: 8px 16px;
+            border: 1px solid #d1d5db;
+            background: white;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .pagination button:hover:not(:disabled) {
+            background: #f3f4f6;
+            border-color: #9ca3af;
+        }
+        
+        .pagination button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .pagination button.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+        
+        .page-info {
+            color: #6b7280;
+            font-size: 0.9em;
+        }
+        
+        /* 載入中動畫 */
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #6b7280;
+        }
+        
+        .spinner {
+            border: 3px solid #f3f4f6;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* 錯誤訊息 */
+        .error-message {
+            background: #fee;
+            color: #c53030;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        
+        /* 搜尋結果訊息 */
+        .search-result-info {
+            background: #e0f2fe;
+            color: #0369a1;
+            padding: 10px 15px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            font-size: 0.9em;
+        }
+        
+        /* 資料表響應式調整 */
+        .table-container {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        /* 當螢幕寬度小於 1200px 時調整 */
+        @media (max-width: 1200px) {
+            .container {
+                padding: 15px;
+            }
+            
+            .stats-container {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .desktop-search-controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .desktop-search-controls .search-input {
+                flex: 0 1 auto;
+                max-width: none;
+            }
+            
+            .desktop-search-controls .ai-search-container {
+                display: flex;
+                gap: 10px;
+                flex: 0 1 auto;
+                max-width: none;
+                position: relative;
+            }
+        }
+        
+        /* 手機版樣式 (768px 以下) */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 1.8em;
+            }
+            
+            .subtitle {
+                font-size: 0.95em;
+            }
+            
+            .stats-container {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+            
+            .stat-card {
+                padding: 20px;
+            }
+            
+            .stat-number {
+                font-size: 2em;
+            }
+            
+            .main-content {
+                padding: 20px 15px;
+            }
+            
+            /* 隱藏桌面版搜尋區域 */
+            .search-section {
+                display: none;
+            }
+            
+            /* 顯示手機版搜尋按鈕 */
+            .mobile-search-btn {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+            
+            /* 搜尋面板樣式調整 */
+            .search-group {
+                margin-bottom: 15px;
+            }
+            
+            .search-group label {
+                display: block;
+                margin-bottom: 8px;
+                font-weight: 600;
+                color: #495057;
+            }
+            
+            .search-group .ai-search-input {
+                width: 100%;
+                margin-bottom: 10px;
+            }
+            
+            .search-group .ai-search-btn {
+                width: 100%;
+            }
+            
+            .search-actions {
+                margin-top: 20px;
+                display: flex;
+                gap: 10px;
+            }
+            
+            .search-actions button {
+                flex: 1;
+            }
+            
+            /* 表格響應式處理 */
+            .table-container {
+                margin: 0 -15px;
+            }
+            
+            .permits-table {
+                font-size: 0.8em;
+            }
+            
+            .table-header th,
+            .table-row td {
+                padding: 8px 4px;
+            }
+            
+            /* 隱藏某些欄位 */
+            .hide-mobile {
+                display: none;
+            }
+            
+            /* 分頁調整 */
+            .pagination {
+                font-size: 0.9em;
+            }
+            
+            .pagination button {
+                padding: 6px 12px;
+                font-size: 0.85em;
+            }
+            
+            /* 圖表容器調整 */
+            .chart-container {
+                padding: 20px 15px;
+            }
+            
+            #yearChart {
+                height: 250px;
+            }
+        }
+        
+        /* 平板樣式優化 */
+        @media (min-width: 769px) and (max-width: 1024px) {
+            .container {
+                padding: 20px;
+            }
+            
+            .stats-container {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            /* 搜尋區域優化 */
+            .search-section {
+                padding: 15px;
+            }
+            
+            .ai-search-container {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .search-input {
+                width: 100%;
+            }
+        }
+        
+        /* 深色模式支援 (選用) */
+        @media (prefers-color-scheme: dark) {
+            /* 可以在這裡添加深色模式樣式 */
+        }
+        
+        /* 列印樣式 */
+        @media print {
+            .mobile-search-btn,
+            .export-btn,
+            .search-section,
+            .filter-controls,
+            .pagination {
+                display: none !important;
+            }
+            
+            .main-content {
+                box-shadow: none;
+                padding: 0;
+            }
+            
+            .table-row {
+                page-break-inside: avoid;
+            }
+        }
+        
+        /* 無障礙優化 */
+        .visually-hidden {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+        
+        /* 動畫效果 */
+        .fade-in {
+            animation: fadeIn 0.3s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        /* 工具提示 */
+        .tooltip {
+            position: relative;
+            display: inline-block;
+        }
+        
+        .tooltip .tooltiptext {
+            visibility: hidden;
+            width: 200px;
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            border-radius: 6px;
+            padding: 8px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -100px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-size: 0.85em;
+        }
+        
+        .tooltip:hover .tooltiptext {
+            visibility: visible;
+            opacity: 1;
+        }
+        
+        /* 特殊標記 */
+        .badge {
+            display: inline-block;
+            padding: 3px 8px;
+            font-size: 0.75em;
+            font-weight: 600;
+            border-radius: 12px;
+            text-transform: uppercase;
+        }
+        
+        .badge-success {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        
+        .badge-warning {
+            background: #fed7aa;
+            color: #92400e;
+        }
+        
+        .badge-danger {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+        
+        /* 手機優化調整 */
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 1.5em;
+            }
+            
+            .stat-number {
+                font-size: 1.8em;
+            }
+            
+            .table-container {
+                font-size: 0.75em;
+            }
+            
+            /* 更緊湊的表格 */
+            .table-header th,
+            .table-row td {
+                padding: 6px 3px;
+            }
+            
+            /* 隱藏更多欄位以適應小螢幕 */
+            .hide-small {
+                display: none;
+            }
+            
+            #permitsList {
+                padding: 0 !important;
+            }
+            
+            /* 手機版搜尋控制項調整 */
+            .search-panel .ai-search-container {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .search-panel .ai-search-input {
+                width: 100%;
+            }
+            
+            .search-panel .ai-search-btn {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            /* 在手機版隱藏桌面版的AI搜尋結果 */
+            #aiSearchResultsDesktop {
+                display: none !important;
+            }
+        }
+        
+        /* 超小螢幕優化 */
+        @media (max-width: 360px) {
+            .container {
+                padding: 10px;
+            }
+            
+            h1 {
+                font-size: 1.3em;
+            }
+            
+            .stat-card {
+                padding: 15px;
+            }
+            
+            .main-content {
+                padding: 15px 10px;
+            }
+        }
+        
+        /* 滾動條美化 */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+        
+        /* 選擇框美化 */
+        select {
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 0.7rem center;
+            background-size: 1em;
+            padding-right: 2.5em;
+        }
+        
+        /* 焦點樣式優化 */
+        *:focus {
+            outline: 2px solid #667eea;
+            outline-offset: 2px;
+        }
+        
+        button:focus,
+        a:focus {
+            outline-offset: 4px;
+        }
+        
+        /* 連結樣式 */
+        a {
+            color: #667eea;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+        
+        a:hover {
+            color: #5a67d8;
+            text-decoration: underline;
+        }
+        
+        /* 表格空狀態 */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #9ca3af;
+        }
+        
+        .empty-state-icon {
+            font-size: 4em;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+        
+        .empty-state-text {
+            font-size: 1.1em;
+            margin-bottom: 10px;
+        }
+        
+        .empty-state-hint {
+            font-size: 0.9em;
+            color: #6b7280;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>🏢 台中市建築執照資料查詢系統</h1>
+            <p class="subtitle">Taichung Building Permits Query System</p>
+        </div>
+    </header>
+    
+    <div class="container">
+        <!-- 統計卡片 -->
+        <div class="stats-container">
+            <div class="stat-card">
+                <div class="stat-number" id="totalPermits">0</div>
+                <div class="stat-label">總建照數</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="thisYearPermits">0</div>
+                <div class="stat-label">114年建照數</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="totalApplicants">0</div>
+                <div class="stat-label">起造人數</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="avgFloors">0</div>
+                <div class="stat-label">平均樓層數</div>
+            </div>
+        </div>
+        
+        <!-- 主要內容 -->
+        <div class="main-content">
+            <!-- 桌面版搜尋區域 -->
+            <div class="search-section">
+                <div class="desktop-search-controls">
+                    <input type="text" class="search-input" id="applicantSearchDesktop" placeholder="搜尋起造人..." onkeyup="searchApplicant(this.value, 'desktop')">
+                    <button class="btn btn-secondary" onclick="clearSearch()">清除</button>
+                    
+                    <div class="ai-search-container">
+                        <input type="text" 
+                               class="ai-search-input" 
+                               id="aiSearchInputDesktop" 
+                               placeholder="自然語言搜尋 (例: 113年3月後北屯區7樓以上)" 
+                               onkeypress="if(event.key==='Enter') performAISearch('desktop')">
+                        <button class="ai-search-btn" id="aiSearchBtnDesktop" onclick="performAISearch('desktop')">
+                            <span>🤖</span>
+                            <span>智慧搜尋</span>
+                        </button>
+                        <div class="ai-search-results" id="aiSearchResultsDesktop"></div>
+                    </div>
+                    
+                    <!-- 寶佳篩選 -->
+                    <div style="display: flex; align-items: center; margin-left: 20px;">
+                        <label style="display: flex; align-items: center; cursor: pointer; font-size: 0.9em;">
+                            <input type="checkbox" id="baojiaFilter" onchange="toggleBaojiaFilter()" style="margin-right: 5px;">
+                            <span>🏗️ 只看寶佳機構</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 手機版滑出式搜尋面板 -->
+            <div class="search-panel" id="searchPanel">
+                <div class="search-panel-header">
+                    <h3 class="search-panel-title">搜尋建照資料</h3>
+                    <button class="close-search-btn" onclick="toggleSearchPanel()">✕</button>
+                </div>
+                
+                <div class="search-content">
+                    <div class="search-group">
+                        <label>起造人搜尋</label>
+                        <input type="text" class="search-input" id="applicantSearchMobile" placeholder="搜尋起造人..." onkeyup="searchApplicant(this.value, 'mobile')">
+                    </div>
+                    
+                    <div class="search-group">
+                        <label>智慧搜尋</label>
+                        <input type="text" 
+                               class="ai-search-input" 
+                               id="aiSearchInputMobile" 
+                               placeholder="自然語言搜尋 (例: 113年3月後北屯區7樓以上)" 
+                               onkeypress="if(event.key==='Enter') performAISearch('mobile')">
+                        <button class="ai-search-btn" id="aiSearchBtnMobile" onclick="performAISearch('mobile')">
+                            <span>🤖</span>
+                            <span>智慧搜尋</span>
+                        </button>
+                        <div class="ai-search-results" id="aiSearchResultsMobile"></div>
+                    </div>
+                    
+                    <div class="search-actions">
+                        <button class="btn btn-secondary" onclick="clearAllSearches()">清除全部</button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 建照列表 -->
+            <div id="permitsList">
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p>載入資料中...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 手機版搜尋按鈕 -->
+    <button class="mobile-search-btn" onclick="toggleSearchPanel()">
+        🔍
+    </button>
+    
+    <!-- 匯出按鈕 -->
+    <button class="export-btn" onclick="exportToExcel()">
+        <span>📊</span>
+        <span>匯出 Excel</span>
+    </button>
+    
+    <script>
+        // API 端點
+        const PERMITS_API = 'https://objectstorage.ap-tokyo-1.oraclecloud.com/n/nrsdi1rz5vl8/b/taichung-building-permits/o/all_permits.json';
+        const LOGS_API = 'https://objectstorage.ap-tokyo-1.oraclecloud.com/n/nrsdi1rz5vl8/b/taichung-building-permits/o/data/crawl-logs.json';
+        
+        let allPermits = [];
+        let filteredPermits = [];
+        let sortConfig = { key: 'permitNumber', direction: 'desc' };
+        let currentPage = 1;
+        const itemsPerPage = 50;
+        let currentApplicantSearch = '';
+        let baojiaCompanies = [];
+        let baojiFilterActive = false;
+        
+        // 頁面載入時初始化
+        window.addEventListener('DOMContentLoaded', async function() {
+            // 載入寶佳公司名單
+            await loadBaojiaCompanies();
+            loadData();
+        });
+        
+        // 載入資料
+        async function loadData() {
+            try {
+                console.log('開始載入資料...');
+                const response = await fetch(PERMITS_API);
+                
+                if (!response.ok) {
+                    throw new Error('無法載入資料');
+                }
+                
+                const data = await response.json();
+                allPermits = data.permits || [];
+                console.log(`成功載入 ${allPermits.length} 筆資料`);
+                
+                // 初始顯示所有資料
+                filteredPermits = [...allPermits];
+                
+                // 更新統計資訊
+                updateStats();
+                
+                // 顯示資料
+                renderPermits();
+                
+            } catch (error) {
+                console.error('載入資料錯誤:', error);
+                document.getElementById('permitsList').innerHTML = `
+                    <div class="error-message">
+                        載入資料失敗: ${error.message}
+                    </div>
+                `;
+            }
+        }
+        
+        // 載入寶佳公司名單
+        async function loadBaojiaCompanies() {
+            try {
+                const response = await fetch('https://objectstorage.ap-tokyo-1.oraclecloud.com/n/nrsdi1rz5vl8/b/taichung-building-permits/o/baojia_companies.json');
+                const data = await response.json();
+                baojiaCompanies = data.companies || [];
+                console.log('載入寶佳公司名單:', baojiaCompanies.length, '家');
+            } catch (error) {
+                console.error('載入寶佳公司名單失敗:', error);
+                baojiaCompanies = [];
+            }
+        }
+        
+        // 切換寶佳篩選
+        function toggleBaojiaFilter() {
+            baojiFilterActive = document.getElementById('baojiaFilter').checked;
+            applyFilters();
+        }
+        
+        // 寶佳智慧匹配
+        function isBaojiaCompany(applicantName) {
+            if (!applicantName || baojiaCompanies.length === 0) return false;
+            
+            // 清理申請人名稱
+            let cleanName = applicantName
+                .replace(/負責人[：:].+$/g, '')
+                .replace(/代表人[：:].+$/g, '')
+                .replace(/\s+等如附表$/g, '')
+                .trim();
+            
+            // 公司名稱後綴
+            const suffixes = ['股份有限公司', '有限公司', '建設股份有限公司', '營造股份有限公司', '營造有限公司'];
+            
+            return baojiaCompanies.some(company => {
+                // 完全匹配
+                if (cleanName === company) return true;
+                
+                // 移除後綴比對
+                let companyBase = company;
+                let nameBase = cleanName;
+                
+                for (const suffix of suffixes) {
+                    companyBase = companyBase.replace(suffix, '');
+                    nameBase = nameBase.replace(suffix, '');
+                }
+                
+                if (companyBase === nameBase) return true;
+                
+                // 包含關係檢查
+                if (cleanName.includes(company) || company.includes(cleanName)) return true;
+                
+                return false;
+            });
+        }
+        
+        // 統計資料更新
+        function updateStats() {
+            const currentYear = new Date().getFullYear() - 1911; // 民國年
+            const thisYearPermits = allPermits.filter(p => p.indexKey && p.indexKey.startsWith(currentYear.toString()));
+            
+            // 計算起造人數（去重）
+            const applicants = new Set(allPermits.map(p => p.applicantName).filter(a => a));
+            
+            // 計算平均樓層
+            const floorsData = allPermits
+                .map(p => parseInt(p.aboveGroundFloors) || parseInt(p.floors) || 0)
+                .filter(f => f > 0);
+            const avgFloors = floorsData.length > 0 
+                ? Math.round(floorsData.reduce((a, b) => a + b, 0) / floorsData.length)
+                : 0;
+            
+            // 更新顯示
+            document.getElementById('totalPermits').textContent = allPermits.length.toLocaleString();
+            document.getElementById('thisYearPermits').textContent = thisYearPermits.length.toLocaleString();
+            document.getElementById('totalApplicants').textContent = applicants.size.toLocaleString();
+            document.getElementById('avgFloors').textContent = avgFloors;
+        }
+        
+        // 搜尋起造人
+        function searchApplicant(searchTerm, source) {
+            currentApplicantSearch = searchTerm.toLowerCase().trim();
+            
+            // 同步兩個搜尋框的值
+            if (source === 'desktop') {
+                document.getElementById('applicantSearchMobile').value = searchTerm;
+            } else {
+                document.getElementById('applicantSearchDesktop').value = searchTerm;
+            }
+            
+            applyFilters();
+        }
+        
+        // 套用所有篩選條件
+        function applyFilters() {
+            console.log('套用篩選條件...');
+            console.log('起造人搜尋:', currentApplicantSearch);
+            console.log('AI搜尋條件:', aiSearchConditions);
+            
+            filteredPermits = allPermits.filter(permit => {
+                // 起造人搜尋
+                if (currentApplicantSearch) {
+                    const applicantName = (permit.applicantName || '').toLowerCase();
+                    if (!applicantName.includes(currentApplicantSearch)) return false;
+                }
+                
+                // 寶佳篩選
+                if (baojiFilterActive && !isBaojiaCompany(permit.applicantName)) {
+                    return false;
+                }
+                
+                // AI 搜尋條件篩選
+                if (aiSearchConditions) {
+                    // 年份篩選（AI搜尋優先）
+                    if (aiSearchConditions.year) {
+                        const permitYear = parseInt(permit.indexKey.substring(0, 3));
+                        if (permitYear !== aiSearchConditions.year) return false;
+                    }
+                    
+                    // 月份篩選
+                    if (aiSearchConditions.month_from && permit.issueDate) {
+                        const permitMonth = parseInt(permit.issueDate.split('-')[1]);
+                        if (permitMonth < aiSearchConditions.month_from) return false;
+                    }
+                    
+                    // 行政區篩選（AI搜尋）
+                    if (aiSearchConditions.area || aiSearchConditions.areas) {
+                        const permitArea = permit.administrativeArea || permit.area || permit.district || '';
+                        
+                        if (aiSearchConditions.areas) {
+                            // 多個區域，只要符合其中一個即可
+                            const hasMatchingArea = aiSearchConditions.areas.some(area => 
+                                permitArea.includes(area)
+                            );
+                            if (!hasMatchingArea) return false;
+                        } else if (aiSearchConditions.area) {
+                            // 單一區域
+                            if (!permitArea.includes(aiSearchConditions.area)) return false;
+                        }
+                    }
+                    
+                    // 樓層篩選
+                    const floors = parseInt(permit.aboveGroundFloors) || parseInt(permit.floors) || 0;
+                    if (aiSearchConditions.floors_min && floors < aiSearchConditions.floors_min) return false;
+                    if (aiSearchConditions.floors_max && floors > aiSearchConditions.floors_max) return false;
+                    
+                    // 戶數篩選
+                    const units = parseInt(permit.units) || parseInt(permit.unitCount) || 0;
+                    if (aiSearchConditions.unit_count_min && units < aiSearchConditions.unit_count_min) return false;
+                    if (aiSearchConditions.unit_count_max && units > aiSearchConditions.unit_count_max) return false;
+                    
+                    // 面積篩選
+                    const area = parseFloat(permit.totalFloorArea) || 0;
+                    if (aiSearchConditions.total_area_min && area < aiSearchConditions.total_area_min) return false;
+                    
+                    // 申請人關鍵字篩選
+                    if (aiSearchConditions.applicant_keyword) {
+                        const applicantName = (permit.applicantName || '').toLowerCase();
+                        if (!applicantName.includes(aiSearchConditions.applicant_keyword.toLowerCase())) return false;
+                    }
+                    
+                    // 地址關鍵字篩選
+                    if (aiSearchConditions.address_keyword) {
+                        const address = (permit.constructionAddress || '').toLowerCase();
+                        if (!address.includes(aiSearchConditions.address_keyword.toLowerCase())) return false;
+                    }
+                }
+                
+                return true;
+            });
+            
+            console.log(`篩選結果: ${filteredPermits.length} 筆`);
+            
+            // 重置到第一頁
+            currentPage = 1;
+            
+            // 重新渲染
+            renderPermits();
+        }
+        
+        // 清除搜尋
+        function clearSearch() {
+            document.getElementById('applicantSearchDesktop').value = '';
+            document.getElementById('applicantSearchMobile').value = '';
+            currentApplicantSearch = '';
+            applyFilters();
+        }
+        
+        // 清除所有搜尋
+        function clearAllSearches() {
+            // 清除起造人搜尋
+            clearSearch();
+            
+            // 清除AI搜尋
+            document.getElementById('aiSearchInputDesktop').value = '';
+            document.getElementById('aiSearchInputMobile').value = '';
+            document.getElementById('aiSearchResultsDesktop').innerHTML = '';
+            document.getElementById('aiSearchResultsMobile').innerHTML = '';
+            aiSearchConditions = null;
+            applyFilters();
+        }
+        
+        // Claude API 智慧搜尋功能
+        let aiSearchConditions = null;
+        
+        async function performAISearch(source = 'desktop') {
+            const inputId = source === 'desktop' ? 'aiSearchInputDesktop' : 'aiSearchInputMobile';
+            const btnId = source === 'desktop' ? 'aiSearchBtnDesktop' : 'aiSearchBtnMobile';
+            const resultsId = source === 'desktop' ? 'aiSearchResultsDesktop' : 'aiSearchResultsMobile';
+            
+            const query = document.getElementById(inputId).value.trim();
+            if (!query) {
+                alert('請輸入搜尋條件');
+                return;
+            }
+            
+            const btn = document.getElementById(btnId);
+            const resultsDiv = document.getElementById(resultsId);
+            
+            // 顯示載入中
+            btn.disabled = true;
+            btn.innerHTML = '<span>🔄</span><span>搜尋中...</span>';
+            resultsDiv.innerHTML = '<div class="ai-search-loading">AI 正在解析您的查詢...</div>';
+            resultsDiv.style.display = 'block';
+            
+            try {
+                // 先嘗試本地解析（增強版）
+                const localConditions = parseNaturalLanguageQueryEnhanced(query);
+                console.log('本地解析結果:', localConditions);
+                
+                if (localConditions) {
+                    // 使用本地解析結果
+                    aiSearchConditions = localConditions;
+                    applyAISearchFilters();
+                    
+                    // 顯示解析結果
+                    resultsDiv.innerHTML = `
+                        <div class="filter-results">
+                            <strong>搜尋條件：</strong><br>
+                            ${formatSearchConditions(aiSearchConditions)}
+                            <br><br>
+                            找到 ${filteredPermits.length} 筆符合的資料
+                        </div>
+                    `;
+                    
+                    // 3秒後自動隱藏
+                    setTimeout(() => {
+                        resultsDiv.style.display = 'none';
+                    }, 3000);
+                } else {
+                    // 本地解析失敗
+                    resultsDiv.innerHTML = '<div class="ai-search-loading">無法解析查詢，請嘗試更具體的描述</div>';
+                }
+                
+            } catch (error) {
+                console.error('搜尋錯誤:', error);
+                alert('搜尋失敗，請稍後再試');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<span>🤖</span><span>智慧搜尋</span>';
+            }
+        }
+        
+        // 增強版本地解析函數
+        function parseNaturalLanguageQueryEnhanced(query) {
+            const conditions = {};
+            
+            // 先將查詢字串標準化
+            let normalizedQuery = query;
+            // 在數字和中文之間加入空格
+            normalizedQuery = normalizedQuery.replace(/(\d+)([^\d\s])/g, '$1 $2');
+            normalizedQuery = normalizedQuery.replace(/([^\d\s])(\d+)/g, '$1 $2');
+            
+            console.log('增強解析 - 標準化查詢:', normalizedQuery);
+            
+            // 1. 年份解析（支援多種格式）
+            const yearPatterns = [
+                /(\d{3})\s*年/,  // 113年
+                /民國\s*(\d{2,3})/,  // 民國113
+                /(\d{4})\s*年/  // 2024年（需轉換）
+            ];
+            
+            for (const pattern of yearPatterns) {
+                const match = normalizedQuery.match(pattern);
+                if (match) {
+                    let year = parseInt(match[1]);
+                    // 如果是西元年，轉換為民國年
+                    if (year > 1911) {
+                        year = year - 1911;
+                    }
+                    // 如果是兩位數，補上1
+                    if (year < 100) {
+                        year = year + 100;
+                    }
+                    conditions.year = year;
+                    break;
+                }
+            }
+            
+            // 2. 月份解析（支援範圍）
+            const monthRangeMatch = normalizedQuery.match(/(\d{1,2})\s*[-~到至]\s*(\d{1,2})\s*月/);
+            const monthFromMatch = normalizedQuery.match(/(\d{1,2})\s*月\s*(以後|之後|後)/);
+            const monthSingleMatch = normalizedQuery.match(/(\d{1,2})\s*月(?!以|之|後)/);
+            
+            if (monthRangeMatch) {
+                conditions.month_from = parseInt(monthRangeMatch[1]);
+                conditions.month_to = parseInt(monthRangeMatch[2]);
+            } else if (monthFromMatch) {
+                conditions.month_from = parseInt(monthFromMatch[1]);
+            } else if (monthSingleMatch) {
+                conditions.month_from = parseInt(monthSingleMatch[1]);
+                conditions.month_to = parseInt(monthSingleMatch[1]);
+            }
+            
+            // 3. 行政區解析（支援多個區域）
+            const areas = ['北屯區', '西屯區', '南屯區', '西區', '北區', '南區', '東區', '中區', 
+                          '太平區', '大里區', '霧峰區', '烏日區', '豐原區', '潭子區', '大雅區', 
+                          '神岡區', '后里區', '東勢區', '和平區', '新社區', '石岡區', '外埔區', 
+                          '大安區', '清水區', '沙鹿區', '龍井區', '梧棲區', '大肚區', '大甲區'];
+            
+            const foundAreas = [];
+            for (const area of areas) {
+                if (query.includes(area)) {
+                    foundAreas.push(area);
+                }
+            }
+            
+            if (foundAreas.length > 0) {
+                if (foundAreas.length === 1) {
+                    conditions.area = foundAreas[0];
+                } else {
+                    conditions.areas = foundAreas;
+                }
+            }
+            
+            // 4. 樓層解析（支援多種格式）
+            const floorPatterns = [
+                { pattern: /(\d+)\s*[-~到至]\s*(\d+)\s*樓/, type: 'range' },
+                { pattern: /(\d+)\s*樓\s*(以上|及以上)/, type: 'min' },
+                { pattern: /(\d+)\s*樓\s*(以下|及以下)/, type: 'max' },
+                { pattern: /超過\s*(\d+)\s*樓/, type: 'min_plus' },
+                { pattern: /低於\s*(\d+)\s*樓/, type: 'max_minus' }
+            ];
+            
+            for (const { pattern, type } of floorPatterns) {
+                const match = normalizedQuery.match(pattern);
+                if (match) {
+                    switch (type) {
+                        case 'range':
+                            conditions.floors_min = parseInt(match[1]);
+                            conditions.floors_max = parseInt(match[2]);
+                            break;
+                        case 'min':
+                            conditions.floors_min = parseInt(match[1]);
+                            break;
+                        case 'max':
+                            conditions.floors_max = parseInt(match[1]);
+                            break;
+                        case 'min_plus':
+                            conditions.floors_min = parseInt(match[1]) + 1;
+                            break;
+                        case 'max_minus':
+                            conditions.floors_max = parseInt(match[1]) - 1;
+                            break;
+                    }
+                    break;
+                }
+            }
+            
+            // 5. 戶數解析
+            const unitPatterns = [
+                { pattern: /(\d+)\s*[-~到至]\s*(\d+)\s*戶/, type: 'range' },
+                { pattern: /(\d+)\s*戶\s*(以上|及以上)/, type: 'min' },
+                { pattern: /(\d+)\s*戶\s*(以下|及以下)/, type: 'max' },
+                { pattern: /超過\s*(\d+)\s*戶/, type: 'min_plus' }
+            ];
+            
+            for (const { pattern, type } of unitPatterns) {
+                const match = normalizedQuery.match(pattern);
+                if (match) {
+                    switch (type) {
+                        case 'range':
+                            conditions.unit_count_min = parseInt(match[1]);
+                            conditions.unit_count_max = parseInt(match[2]);
+                            break;
+                        case 'min':
+                            conditions.unit_count_min = parseInt(match[1]);
+                            break;
+                        case 'max':
+                            conditions.unit_count_max = parseInt(match[1]);
+                            break;
+                        case 'min_plus':
+                            conditions.unit_count_min = parseInt(match[1]) + 1;
+                            break;
+                    }
+                    break;
+                }
+            }
+            
+            // 6. 申請人/建設公司解析
+            const companyKeywords = ['建設', '營造', '建築', '開發', '企業', '公司'];
+            let companyName = null;
+            
+            for (const keyword of companyKeywords) {
+                const regex = new RegExp(`([\\u4e00-\\u9fa5]+${keyword})`, 'g');
+                const matches = query.match(regex);
+                if (matches) {
+                    // 找最長的匹配
+                    companyName = matches.reduce((a, b) => a.length > b.length ? a : b);
+                    break;
+                }
+            }
+            
+            // 檢查是否有特定公司名稱
+            if (!companyName) {
+                const knownCompanies = ['寶佳', '遠雄', '興富發', '國泰', '富邦', '長虹', '太子'];
+                for (const company of knownCompanies) {
+                    if (query.includes(company)) {
+                        companyName = company;
+                        break;
+                    }
+                }
+            }
+            
+            if (companyName) {
+                conditions.applicant_keyword = companyName;
+            }
+            
+            // 7. 特殊關鍵字處理
+            if (normalizedQuery.includes('豪宅')) {
+                conditions.unit_count_max = conditions.unit_count_max || 100;
+                conditions.floors_min = conditions.floors_min || 15;
+                conditions.total_area_min = conditions.total_area_min || 10000;
+            }
+            
+            if (normalizedQuery.includes('透天')) {
+                conditions.floors_max = conditions.floors_max || 5;
+                // 透天定義：5層樓以下的房子（不限制戶數）
+            }
+            
+            if (normalizedQuery.includes('大型') || normalizedQuery.includes('大樓')) {
+                conditions.unit_count_min = conditions.unit_count_min || 50;
+                conditions.floors_min = conditions.floors_min || 10;
+            }
+            
+            console.log('增強解析 - 原始查詢:', query);
+            console.log('增強解析 - 標準化查詢:', normalizedQuery);
+            console.log('增強解析 - 找到的區域:', foundAreas);
+            console.log('增強解析 - 最終結果:', conditions);
+            return Object.keys(conditions).length > 0 ? conditions : null;
+        }
+        
+        // 本地解析函數（用於測試）
+        function parseNaturalLanguageQuery(query) {
+            const conditions = {};
+            
+            // 先將查詢字串標準化（加入空格以便解析）
+            let normalizedQuery = query;
+            // 在數字和中文之間加入空格
+            normalizedQuery = normalizedQuery.replace(/(\d+)([^\d\s])/g, '$1 $2');
+            normalizedQuery = normalizedQuery.replace(/([^\d\s])(\d+)/g, '$1 $2');
+            
+            console.log('標準化查詢:', normalizedQuery);
+            
+            // 解析年份
+            const yearMatch = normalizedQuery.match(/(\d{3})\s*年/);
+            if (yearMatch) {
+                conditions.year = parseInt(yearMatch[1]);
+            }
+            
+            // 解析月份
+            const monthMatch = normalizedQuery.match(/(\d{1,2})\s*月/);
+            if (monthMatch) {
+                conditions.month_from = parseInt(monthMatch[1]);
+            }
+            
+            // 解析行政區 - 使用更精確的匹配
+            const areas = ['北屯區', '西屯區', '南屯區', '西區', '北區', '南區', '東區', '中區', 
+                          '太平區', '大里區', '霧峰區', '烏日區', '豐原區', '潭子區', '大雅區', 
+                          '神岡區', '后里區', '東勢區', '和平區', '新社區', '石岡區', '外埔區', 
+                          '大安區', '清水區', '沙鹿區', '龍井區', '梧棲區', '大肚區', '大甲區'];
+            
+            // 尋找所有匹配的行政區（以最後一個為準）
+            let foundArea = null;
+            for (const area of areas) {
+                if (query.includes(area)) {
+                    foundArea = area;
+                }
+            }
+            if (foundArea) {
+                conditions.area = foundArea;
+            }
+            
+            // 解析樓層 - 支援區間
+            const floorRangeMatch = normalizedQuery.match(/(\d+)\s*[-~到至]\s*(\d+)\s*樓/);
+            const floorMinMatch = normalizedQuery.match(/(\d+)\s*樓以上/);
+            const floorMaxMatch = normalizedQuery.match(/(\d+)\s*樓以下/);
+            
+            if (floorRangeMatch) {
+                conditions.floors_min = parseInt(floorRangeMatch[1]);
+                conditions.floors_max = parseInt(floorRangeMatch[2]);
+            } else if (floorMinMatch) {
+                conditions.floors_min = parseInt(floorMinMatch[1]);
+            } else if (floorMaxMatch) {
+                conditions.floors_max = parseInt(floorMaxMatch[1]);
+            }
+            
+            // 解析戶數 - 支援區間和以上
+            const unitRangeMatch = normalizedQuery.match(/(\d+)\s*[-~到至]\s*(\d+)\s*戶/);
+            const unitMinMatch = normalizedQuery.match(/(\d+)\s*戶以上/);
+            const unitMaxMatch = normalizedQuery.match(/(\d+)\s*戶以下/);
+            
+            if (unitRangeMatch) {
+                conditions.unit_count_min = parseInt(unitRangeMatch[1]);
+                conditions.unit_count_max = parseInt(unitRangeMatch[2]);
+            } else if (unitMinMatch) {
+                conditions.unit_count_min = parseInt(unitMinMatch[1]);
+            } else if (unitMaxMatch) {
+                conditions.unit_count_max = parseInt(unitMaxMatch[1]);
+            }
+            
+            // 解析申請人關鍵字
+            if (query.includes('建設')) {
+                const companyMatch = query.match(/(\S+建設)/);
+                if (companyMatch) {
+                    conditions.applicant_keyword = companyMatch[1];
+                }
+            }
+            
+            console.log('本地解析結果:', conditions);
+            return conditions;
+        }
+        
+        // 套用 AI 搜尋篩選
+        function applyAISearchFilters() {
+            console.log('AI搜尋條件:', aiSearchConditions);
+            // 直接呼叫主要的篩選函數，它會檢查 aiSearchConditions
+            applyFilters();
+            
+            // 除錯：顯示前5筆符合的資料
+            if (filteredPermits.length > 0) {
+                console.log('前5筆符合的資料:');
+                filteredPermits.slice(0, 5).forEach(permit => {
+                    console.log(`- ${permit.permitNumber}: ${permit.applicantName} / ${permit.constructionAddress}`);
+                });
+            }
+        }
+        
+        // 格式化搜尋條件顯示
+        function formatSearchConditions(conditions) {
+            const parts = [];
+            
+            if (conditions.year) {
+                parts.push(`年份: ${conditions.year}年`);
+            }
+            
+            if (conditions.month_from) {
+                if (conditions.month_to && conditions.month_to !== conditions.month_from) {
+                    parts.push(`月份: ${conditions.month_from}月至${conditions.month_to}月`);
+                } else {
+                    parts.push(`月份: ${conditions.month_from}月以後`);
+                }
+            }
+            
+            if (conditions.area) {
+                parts.push(`行政區: ${conditions.area}`);
+            } else if (conditions.areas) {
+                parts.push(`行政區: ${conditions.areas.join('、')}`);
+            }
+            
+            if (conditions.floors_min || conditions.floors_max) {
+                if (conditions.floors_min && conditions.floors_max) {
+                    parts.push(`樓層: ${conditions.floors_min}至${conditions.floors_max}樓`);
+                } else if (conditions.floors_min) {
+                    parts.push(`樓層: ${conditions.floors_min}樓以上`);
+                } else {
+                    parts.push(`樓層: ${conditions.floors_max}樓以下`);
+                }
+            }
+            
+            if (conditions.unit_count_min || conditions.unit_count_max) {
+                if (conditions.unit_count_min && conditions.unit_count_max) {
+                    parts.push(`戶數: ${conditions.unit_count_min}至${conditions.unit_count_max}戶`);
+                } else if (conditions.unit_count_min) {
+                    parts.push(`戶數: ${conditions.unit_count_min}戶以上`);
+                } else {
+                    parts.push(`戶數: ${conditions.unit_count_max}戶以下`);
+                }
+            }
+            
+            if (conditions.applicant_keyword) {
+                parts.push(`申請人包含: ${conditions.applicant_keyword}`);
+            }
+            
+            if (conditions.address_keyword) {
+                parts.push(`地址包含: ${conditions.address_keyword}`);
+            }
+            
+            if (conditions.total_area_min) {
+                parts.push(`總面積: ${conditions.total_area_min}平方公尺以上`);
+            }
+            
+            return parts.join('<br>');
+        }
+        
+        // 排序功能
+        function sortBy(key) {
+            if (sortConfig.key === key) {
+                sortConfig.direction = sortConfig.direction === 'asc' ? 'desc' : 'asc';
+            } else {
+                sortConfig.key = key;
+                sortConfig.direction = 'asc';
+            }
+            
+            filteredPermits.sort((a, b) => {
+                let aVal = a[key] || '';
+                let bVal = b[key] || '';
+                
+                // 數字欄位特殊處理
+                if (['floors', 'aboveGroundFloors', 'units', 'buildings', 'totalFloorArea'].includes(key)) {
+                    aVal = parseFloat(aVal) || 0;
+                    bVal = parseFloat(bVal) || 0;
+                }
+                
+                if (aVal < bVal) return sortConfig.direction === 'asc' ? -1 : 1;
+                if (aVal > bVal) return sortConfig.direction === 'asc' ? 1 : -1;
+                return 0;
+            });
+            
+            renderPermits();
+        }
+        
+        // 渲染建照列表
+        function renderPermits() {
+            const startIndex = (currentPage - 1) * itemsPerPage;
+            const endIndex = startIndex + itemsPerPage;
+            const pagePermits = filteredPermits.slice(startIndex, endIndex);
+            
+            if (filteredPermits.length === 0) {
+                document.getElementById('permitsList').innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📋</div>
+                        <div class="empty-state-text">沒有找到符合條件的建照資料</div>
+                        <div class="empty-state-hint">請嘗試調整搜尋條件</div>
+                    </div>
+                `;
+                return;
+            }
+            
+            // 建立表格
+            let html = `
+                <div class="table-container">
+                    <table class="permits-table">
+                        <thead>
+                            <tr class="table-header">
+                                <th onclick="sortBy('permitNumber')" class="sortable ${sortConfig.key === 'permitNumber' ? 'sort-' + sortConfig.direction : ''}">
+                                    建照號碼
+                                </th>
+                                <th onclick="sortBy('applicantName')" class="sortable ${sortConfig.key === 'applicantName' ? 'sort-' + sortConfig.direction : ''}">
+                                    起造人
+                                </th>
+                                <th onclick="sortBy('constructionAddress')" class="sortable ${sortConfig.key === 'constructionAddress' ? 'sort-' + sortConfig.direction : ''}">
+                                    建築地址
+                                </th>
+                                <th onclick="sortBy('administrativeArea')" class="sortable hide-mobile ${sortConfig.key === 'administrativeArea' ? 'sort-' + sortConfig.direction : ''}">
+                                    行政區
+                                </th>
+                                <th onclick="sortBy('aboveGroundFloors')" class="sortable ${sortConfig.key === 'aboveGroundFloors' ? 'sort-' + sortConfig.direction : ''}">
+                                    樓層
+                                </th>
+                                <th onclick="sortBy('units')" class="sortable hide-small ${sortConfig.key === 'units' ? 'sort-' + sortConfig.direction : ''}">
+                                    戶數
+                                </th>
+                                <th onclick="sortBy('buildings')" class="sortable hide-small ${sortConfig.key === 'buildings' ? 'sort-' + sortConfig.direction : ''}">
+                                    棟數
+                                </th>
+                                <th onclick="sortBy('totalFloorArea')" class="sortable hide-mobile ${sortConfig.key === 'totalFloorArea' ? 'sort-' + sortConfig.direction : ''}">
+                                    總面積(㎡)
+                                </th>
+                                <th onclick="sortBy('issueDate')" class="sortable ${sortConfig.key === 'issueDate' ? 'sort-' + sortConfig.direction : ''}">
+                                    發照日期
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+            
+            // 渲染每一筆資料
+            pagePermits.forEach(permit => {
+                const permitNumber = permit.permitNumber || '-';
+                const applicantName = permit.applicantName || '-';
+                const address = permit.constructionAddress || '-';
+                const area = permit.administrativeArea || permit.area || permit.district || '-';
+                const floors = permit.aboveGroundFloors || permit.floors || '-';
+                const units = permit.units || permit.unitCount || '-';
+                const buildings = permit.buildings || permit.buildingCount || '-';
+                const totalArea = permit.totalFloorArea ? parseFloat(permit.totalFloorArea).toLocaleString() : '-';
+                const issueDate = permit.issueDate || '-';
+                
+                // 高亮搜尋關鍵字
+                let highlightedApplicant = applicantName;
+                if (currentApplicantSearch && applicantName !== '-') {
+                    const regex = new RegExp(`(${currentApplicantSearch})`, 'gi');
+                    highlightedApplicant = applicantName.replace(regex, '<span class="highlight">$1</span>');
+                }
+                
+                html += `
+                    <tr class="table-row">
+                        <td class="permit-number">${permitNumber}</td>
+                        <td class="applicant-name" title="${applicantName}">${highlightedApplicant}</td>
+                        <td class="address" title="${address}">${address}</td>
+                        <td class="hide-mobile">${area}</td>
+                        <td>${floors}</td>
+                        <td class="hide-small">${units}</td>
+                        <td class="hide-small">${buildings}</td>
+                        <td class="hide-mobile">${totalArea}</td>
+                        <td>${issueDate}</td>
+                    </tr>
+                `;
+            });
+            
+            html += `
+                        </tbody>
+                    </table>
+                </div>
+            `;
+            
+            // 加入分頁控制
+            const totalPages = Math.ceil(filteredPermits.length / itemsPerPage);
+            html += `
+                <div class="pagination">
+                    <button onclick="goToPage(1)" ${currentPage === 1 ? 'disabled' : ''}>首頁</button>
+                    <button onclick="goToPage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''}>上一頁</button>
+                    <span class="page-info">第 ${currentPage} / ${totalPages} 頁 (共 ${filteredPermits.length} 筆)</span>
+                    <button onclick="goToPage(${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''}>下一頁</button>
+                    <button onclick="goToPage(${totalPages})" ${currentPage === totalPages ? 'disabled' : ''}>末頁</button>
+                </div>
+            `;
+            
+            document.getElementById('permitsList').innerHTML = html;
+        }
+        
+        // 分頁控制
+        function goToPage(page) {
+            const totalPages = Math.ceil(filteredPermits.length / itemsPerPage);
+            if (page >= 1 && page <= totalPages) {
+                currentPage = page;
+                renderPermits();
+                // 捲動到頂部
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        }
+        
+        // 切換搜尋面板
+        function toggleSearchPanel() {
+            const panel = document.getElementById('searchPanel');
+            panel.classList.toggle('active');
+        }
+        
+        // 匯出 Excel 功能
+        function exportToExcel() {
+            // 準備匯出資料
+            const exportData = filteredPermits.map(permit => ({
+                '建照號碼': permit.permitNumber || '',
+                '起造人': permit.applicantName || '',
+                '建築地址': permit.constructionAddress || '',
+                '行政區': permit.administrativeArea || permit.area || permit.district || '',
+                '樓層數': permit.aboveGroundFloors || permit.floors || '',
+                '戶數': permit.units || permit.unitCount || '',
+                '棟數': permit.buildings || permit.buildingCount || '',
+                '總樓地板面積': permit.totalFloorArea || '',
+                '發照日期': permit.issueDate || '',
+                '基地面積': permit.siteArea || '',
+                '建築物高度': permit.buildingHeight || '',
+                '地下層數': permit.basementFloors || ''
+            }));
+            
+            // 轉換為 CSV 格式
+            const headers = Object.keys(exportData[0]);
+            const csvContent = [
+                headers.join(','),
+                ...exportData.map(row => 
+                    headers.map(header => {
+                        const value = row[header];
+                        // 處理包含逗號的值
+                        return typeof value === 'string' && value.includes(',') 
+                            ? `"${value}"` 
+                            : value;
+                    }).join(',')
+                )
+            ].join('\n');
+            
+            // 加入 BOM 以支援中文
+            const BOM = '\uFEFF';
+            const blob = new Blob([BOM + csvContent], { type: 'text/csv;charset=utf-8;' });
+            
+            // 建立下載連結
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            link.setAttribute('href', url);
+            link.setAttribute('download', `台中市建照資料_${new Date().toLocaleDateString('zh-TW').replace(/\//g, '')}.csv`);
+            link.style.visibility = 'hidden';
+            
+            // 觸發下載
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            // 顯示成功訊息
+            alert(`已匯出 ${exportData.length} 筆資料`);
+        }
+        
+        // 監聽鍵盤事件
+        document.addEventListener('keydown', function(e) {
+            // Ctrl/Cmd + F 開啟搜尋
+            if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
+                e.preventDefault();
+                if (window.innerWidth <= 768) {
+                    toggleSearchPanel();
+                } else {
+                    document.getElementById('applicantSearchDesktop').focus();
+                }
+            }
+        });
+        
+        // 監聽視窗大小變化
+        let resizeTimer;
+        window.addEventListener('resize', function() {
+            clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(function() {
+                // 在視窗大小改變時重新渲染
+                renderPermits();
+            }, 250);
+        });
+    </script>
+</body>
+</html>

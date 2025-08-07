@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>爬蟲執行記錄 - 台中市建照爬蟲系統</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Microsoft JhengHei', sans-serif;
+            background-color: #f5f5f5;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1em;
+        }
+        
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            color: #667eea;
+            text-decoration: none;
+            font-weight: bold;
+            margin-bottom: 20px;
+            padding: 10px 15px;
+            background: white;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .back-link:hover {
+            transform: translateX(-5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        
+        .stats-summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-box {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        
+        .stat-box h3 {
+            color: #666;
+            font-size: 0.9em;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .stat-box .value {
+            font-size: 2em;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .logs-section {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .logs-section h2 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+        }
+        
+        .log-filters {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .filter-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .filter-group label {
+            font-weight: bold;
+            color: #555;
+        }
+        
+        .filter-group select {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1em;
+        }
+        
+        .logs-table {
+            width: 100%;
+            overflow-x: auto;
+        }
+        
+        .logs-table table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 800px;
+        }
+        
+        .logs-table th {
+            background: #667eea;
+            color: white;
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+        }
+        
+        .logs-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .logs-table tr:hover {
+            background: #f8f9fa;
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 0.85em;
+            font-weight: 600;
+        }
+        
+        .status-completed {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .status-failed {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .status-running {
+            background: #cce5ff;
+            color: #004085;
+        }
+        
+        .chart-container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+        
+        .chart-container h2 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+        }
+        
+        .chart {
+            height: 300px;
+            position: relative;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 50px;
+            color: #666;
+        }
+        
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid #f5c6cb;
+            text-align: center;
+        }
+        
+        .log-detail {
+            cursor: pointer;
+            color: #667eea;
+            text-decoration: underline;
+        }
+        
+        .log-detail:hover {
+            color: #764ba2;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .header h1 {
+                font-size: 1.8em;
+            }
+            
+            .log-filters {
+                flex-direction: column;
+            }
+            
+            .logs-table {
+                font-size: 0.9em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="index-new.html" class="back-link">
+            ← 返回監控主頁
+        </a>
+        
+        <div class="header">
+            <h1>📊 爬蟲執行記錄</h1>
+            <p>查看台中市建照爬蟲的歷史執行記錄與統計分析</p>
+        </div>
+        
+        <div class="stats-summary" id="statsSummary">
+            <div class="stat-box">
+                <h3>總執行次數</h3>
+                <div class="value" id="totalRuns">-</div>
+            </div>
+            <div class="stat-box">
+                <h3>成功率</h3>
+                <div class="value" id="successRate">-</div>
+            </div>
+            <div class="stat-box">
+                <h3>平均爬取數</h3>
+                <div class="value" id="avgCrawled">-</div>
+            </div>
+            <div class="stat-box">
+                <h3>平均執行時間</h3>
+                <div class="value" id="avgDuration">-</div>
+            </div>
+        </div>
+        
+        <div class="chart-container">
+            <h2>📈 30天爬取趨勢</h2>
+            <canvas id="trendChart"></canvas>
+        </div>
+        
+        <div class="logs-section">
+            <h2>📋 詳細執行記錄</h2>
+            
+            <div class="log-filters">
+                <div class="filter-group">
+                    <label for="statusFilter">狀態篩選：</label>
+                    <select id="statusFilter" onchange="filterLogs()">
+                        <option value="">全部狀態</option>
+                        <option value="completed">成功</option>
+                        <option value="failed">失敗</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="monthFilter">月份篩選：</label>
+                    <select id="monthFilter" onchange="filterLogs()">
+                        <option value="">全部月份</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="logs-table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>執行日期</th>
+                            <th>開始時間</th>
+                            <th>結束時間</th>
+                            <th>執行時長</th>
+                            <th>爬取總數</th>
+                            <th>新增記錄</th>
+                            <th>錯誤數</th>
+                            <th>狀態</th>
+                        </tr>
+                    </thead>
+                    <tbody id="logsTableBody">
+                        <tr>
+                            <td colspan="8" class="loading">載入中...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Chart.js for visualization -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <script>
+        const LOGS_API = 'https://objectstorage.ap-tokyo-1.oraclecloud.com/n/nrsdi1rz5vl8/b/taichung-building-permits/o/data/crawl-logs.json';
+        
+        let allLogs = [];
+        let filteredLogs = [];
+        let trendChart = null;
+        
+        // 初始化
+        async function init() {
+            await loadLogs();
+        }
+        
+        // 載入執行記錄
+        async function loadLogs() {
+            try {
+                const response = await fetch(LOGS_API);
+                const data = await response.json();
+                allLogs = data.logs || [];
+                filteredLogs = [...allLogs];
+                
+                updateStats();
+                renderLogs();
+                renderChart();
+                populateFilters();
+                
+            } catch (error) {
+                console.error('載入記錄失敗:', error);
+                document.getElementById('logsTableBody').innerHTML = 
+                    '<tr><td colspan="8" class="error">載入記錄失敗，請稍後再試</td></tr>';
+            }
+        }
+        
+        // 更新統計資料
+        function updateStats() {
+            // 總執行次數
+            document.getElementById('totalRuns').textContent = allLogs.length;
+            
+            // 成功率
+            const successfulRuns = allLogs.filter(log => log.status === 'completed').length;
+            const successRate = allLogs.length > 0 ? 
+                ((successfulRuns / allLogs.length) * 100).toFixed(1) + '%' : '-';
+            document.getElementById('successRate').textContent = successRate;
+            
+            // 平均爬取數
+            const totalCrawled = allLogs.reduce((sum, log) => sum + (log.totalCrawled || 0), 0);
+            const avgCrawled = allLogs.length > 0 ? 
+                Math.round(totalCrawled / allLogs.length) : 0;
+            document.getElementById('avgCrawled').textContent = avgCrawled;
+            
+            // 平均執行時間
+            const totalDuration = allLogs.reduce((sum, log) => {
+                if (log.startTime && log.endTime) {
+                    const duration = new Date(log.endTime) - new Date(log.startTime);
+                    return sum + duration;
+                }
+                return sum;
+            }, 0);
+            const avgDuration = allLogs.length > 0 ? 
+                formatDuration(totalDuration / allLogs.length) : '-';
+            document.getElementById('avgDuration').textContent = avgDuration;
+        }
+        
+        // 填充篩選器
+        function populateFilters() {
+            const monthFilter = document.getElementById('monthFilter');
+            const months = new Set();
+            
+            allLogs.forEach(log => {
+                const date = new Date(log.date);
+                const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+                months.add(monthKey);
+            });
+            
+            Array.from(months).sort().reverse().forEach(month => {
+                const option = document.createElement('option');
+                option.value = month;
+                const [year, monthNum] = month.split('-');
+                option.textContent = `${year}年${parseInt(monthNum)}月`;
+                monthFilter.appendChild(option);
+            });
+        }
+        
+        // 篩選記錄
+        function filterLogs() {
+            const statusFilter = document.getElementById('statusFilter').value;
+            const monthFilter = document.getElementById('monthFilter').value;
+            
+            filteredLogs = allLogs.filter(log => {
+                // 狀態篩選
+                if (statusFilter && log.status !== statusFilter) return false;
+                
+                // 月份篩選
+                if (monthFilter) {
+                    const logMonth = log.date.substring(0, 7);
+                    if (logMonth !== monthFilter) return false;
+                }
+                
+                return true;
+            });
+            
+            renderLogs();
+        }
+        
+        // 渲染記錄表格
+        function renderLogs() {
+            const tbody = document.getElementById('logsTableBody');
+            
+            if (filteredLogs.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8" class="error">沒有符合條件的記錄</td></tr>';
+                return;
+            }
+            
+            tbody.innerHTML = filteredLogs.map(log => {
+                const statusClass = `status-${log.status}`;
+                const statusText = {
+                    'completed': '成功',
+                    'failed': '失敗',
+                    'running': '執行中'
+                }[log.status] || log.status;
+                
+                const duration = log.endTime && log.startTime ? 
+                    calculateDuration(log.startTime, log.endTime) : '-';
+                
+                return `
+                    <tr>
+                        <td>${formatDate(log.date)}</td>
+                        <td>${formatTime(log.startTime)}</td>
+                        <td>${formatTime(log.endTime)}</td>
+                        <td>${duration}</td>
+                        <td>${log.totalCrawled || 0}</td>
+                        <td>${log.newRecords || 0}</td>
+                        <td>${log.errorRecords || 0}</td>
+                        <td><span class="status-badge ${statusClass}">${statusText}</span></td>
+                    </tr>
+                `;
+            }).join('');
+        }
+        
+        // 渲染圖表
+        function renderChart() {
+            const ctx = document.getElementById('trendChart').getContext('2d');
+            
+            // 準備最近30天的資料
+            const last30Days = [];
+            const today = new Date();
+            
+            for (let i = 29; i >= 0; i--) {
+                const date = new Date(today);
+                date.setDate(date.getDate() - i);
+                const dateStr = date.toISOString().split('T')[0];
+                
+                const log = allLogs.find(l => l.date === dateStr);
+                last30Days.push({
+                    date: dateStr,
+                    crawled: log ? log.totalCrawled : 0,
+                    newRecords: log ? log.newRecords : 0,
+                    errors: log ? log.errorRecords : 0
+                });
+            }
+            
+            if (trendChart) {
+                trendChart.destroy();
+            }
+            
+            trendChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: last30Days.map(d => formatChartDate(d.date)),
+                    datasets: [
+                        {
+                            label: '爬取總數',
+                            data: last30Days.map(d => d.crawled),
+                            borderColor: '#667eea',
+                            backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                            tension: 0.3
+                        },
+                        {
+                            label: '新增記錄',
+                            data: last30Days.map(d => d.newRecords),
+                            borderColor: '#28a745',
+                            backgroundColor: 'rgba(40, 167, 69, 0.1)',
+                            tension: 0.3
+                        },
+                        {
+                            label: '錯誤數',
+                            data: last30Days.map(d => d.errors),
+                            borderColor: '#dc3545',
+                            backgroundColor: 'rgba(220, 53, 69, 0.1)',
+                            tension: 0.3
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                precision: 0
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        // 輔助函數
+        function formatDate(dateStr) {
+            const date = new Date(dateStr);
+            return date.toLocaleDateString('zh-TW');
+        }
+        
+        function formatTime(timeStr) {
+            if (!timeStr) return '-';
+            const date = new Date(timeStr);
+            return date.toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit' });
+        }
+        
+        function formatChartDate(dateStr) {
+            const date = new Date(dateStr);
+            return `${date.getMonth() + 1}/${date.getDate()}`;
+        }
+        
+        function calculateDuration(start, end) {
+            const startTime = new Date(start);
+            const endTime = new Date(end);
+            const duration = (endTime - startTime) / 1000;
+            
+            if (duration < 60) {
+                return `${duration.toFixed(1)} 秒`;
+            } else {
+                const minutes = Math.floor(duration / 60);
+                const seconds = (duration % 60).toFixed(0);
+                return `${minutes} 分 ${seconds} 秒`;
+            }
+        }
+        
+        function formatDuration(milliseconds) {
+            const seconds = milliseconds / 1000;
+            if (seconds < 60) {
+                return `${seconds.toFixed(1)} 秒`;
+            } else {
+                const minutes = Math.floor(seconds / 60);
+                const remainingSeconds = (seconds % 60).toFixed(0);
+                return `${minutes} 分 ${remainingSeconds} 秒`;
+            }
+        }
+        
+        // 開始載入資料
+        init();
+    </script>
+</body>
+</html>

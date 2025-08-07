@@ -1,0 +1,52 @@
+#!/bin/bash
+
+# 每日爬蟲腳本 - 每天早上 7:30 執行
+# 自動爬取最新建照資料並同步到 GitHub
+
+# 設定環境變數
+export PATH="/home/laija/bin:$PATH"
+export WORK_DIR="/mnt/c/claude code/建照爬蟲/oci"
+
+# 切換到工作目錄
+cd "$WORK_DIR"
+
+# 記錄開始時間
+echo "=========================================="
+echo "🕐 每日爬蟲開始: $(date '+%Y-%m-%d %H:%M:%S')"
+echo "=========================================="
+
+# 執行爬蟲
+echo "📊 開始爬取最新建照資料..."
+python3 cron_daily_crawler_v3.py >> cron_daily_7am.log 2>&1
+
+# 檢查爬蟲執行結果
+if [ $? -eq 0 ]; then
+    echo "✅ 爬蟲執行成功"
+    
+    # 備份到本地
+    echo "💾 備份資料到本地..."
+    python3 backup_current_data.py >> cron_daily_7am.log 2>&1
+    
+    # 同步到 GitHub
+    echo "🔄 同步資料到 GitHub..."
+    python3 sync_to_github.py >> cron_daily_7am.log 2>&1
+    
+    # 嘗試推送到 GitHub (如果是 git repository)
+    if [ -d "../.git" ]; then
+        echo "📤 推送到 GitHub..."
+        cd ..
+        git add backups/latest.json github/data/permits.json github/data/crawl-logs.json 2>/dev/null
+        git commit -m "每日自動更新建照資料 - $(date '+%Y-%m-%d')" 2>/dev/null
+        git push 2>/dev/null
+        cd "$WORK_DIR"
+    fi
+    
+    echo "✅ 所有任務完成"
+else
+    echo "❌ 爬蟲執行失敗，請檢查日誌"
+fi
+
+# 記錄結束時間
+echo "🕐 每日爬蟲結束: $(date '+%Y-%m-%d %H:%M:%S')"
+echo "=========================================="
+echo ""

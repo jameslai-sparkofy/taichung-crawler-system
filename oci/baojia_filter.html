@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>寶佳機構建照篩選系統</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            background-color: #2c3e50;
+            color: white;
+            padding: 20px 0;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            text-align: center;
+            font-size: 28px;
+        }
+        
+        .main-content {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 20px;
+        }
+        
+        .sidebar {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            height: fit-content;
+            position: sticky;
+            top: 20px;
+        }
+        
+        .permits-section {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .filter-section {
+            margin-bottom: 20px;
+        }
+        
+        .filter-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+        
+        .filter-header h3 {
+            color: #2c3e50;
+            font-size: 18px;
+        }
+        
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary {
+            background-color: #3498db;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: #2980b9;
+        }
+        
+        .btn-success {
+            background-color: #27ae60;
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background-color: #229954;
+        }
+        
+        .btn-danger {
+            background-color: #e74c3c;
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background-color: #c0392b;
+        }
+        
+        .company-manager {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 2px solid #e0e0e0;
+        }
+        
+        .company-input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .company-input {
+            flex: 1;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        
+        .company-list {
+            max-height: 400px;
+            overflow-y: auto;
+            border: 1px solid #e0e0e0;
+            border-radius: 4px;
+            padding: 10px;
+        }
+        
+        .company-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px;
+            margin-bottom: 5px;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+            transition: background-color 0.2s;
+        }
+        
+        .company-item:hover {
+            background-color: #e9ecef;
+        }
+        
+        .company-name {
+            font-size: 14px;
+        }
+        
+        .btn-small {
+            padding: 4px 8px;
+            font-size: 12px;
+        }
+        
+        .stats-section {
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+        }
+        
+        .stat-card {
+            text-align: center;
+            padding: 15px;
+            background-color: white;
+            border-radius: 4px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .stat-number {
+            font-size: 24px;
+            font-weight: bold;
+            color: #3498db;
+        }
+        
+        .stat-label {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+        }
+        
+        .permits-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        
+        .permits-table th,
+        .permits-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        .permits-table th {
+            background-color: #f8f9fa;
+            font-weight: 600;
+            color: #2c3e50;
+            position: sticky;
+            top: 0;
+        }
+        
+        .permits-table tr:hover {
+            background-color: #f8f9fa;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+        
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #3498db;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .search-box {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        
+        .checkbox-item {
+            margin-bottom: 8px;
+        }
+        
+        .checkbox-item input[type="checkbox"] {
+            margin-right: 8px;
+        }
+        
+        .checkbox-item label {
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        .filter-controls {
+            margin-bottom: 15px;
+            display: flex;
+            gap: 10px;
+        }
+        
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .sidebar {
+                position: static;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>🏢 寶佳機構建照篩選系統</h1>
+        </div>
+    </header>
+    
+    <div class="container">
+        <div class="main-content">
+            <div class="sidebar">
+                <div class="filter-section">
+                    <div class="filter-header">
+                        <h3>篩選條件</h3>
+                        <input type="checkbox" id="filterToggle" checked>
+                    </div>
+                    
+                    <div class="filter-controls">
+                        <button class="btn btn-primary btn-small" onclick="selectAll()">全選</button>
+                        <button class="btn btn-primary btn-small" onclick="deselectAll()">全不選</button>
+                    </div>
+                    
+                    <input type="text" class="search-box" id="companySearch" placeholder="搜尋公司名稱...">
+                    
+                    <button class="btn btn-success" style="width: 100%; margin-bottom: 15px;" onclick="applyFilter()">
+                        套用篩選
+                    </button>
+                </div>
+                
+                <div class="company-manager">
+                    <h3 style="margin-bottom: 15px;">公司管理</h3>
+                    <div class="company-input-group">
+                        <input type="text" class="company-input" id="newCompany" placeholder="輸入公司名稱">
+                        <button class="btn btn-primary" onclick="addCompany()">新增</button>
+                    </div>
+                    
+                    <div class="company-list" id="companyList">
+                        <!-- 動態載入公司清單 -->
+                    </div>
+                </div>
+            </div>
+            
+            <div class="permits-section">
+                <div class="stats-section">
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-number" id="totalCompanies">0</div>
+                            <div class="stat-label">寶佳機構公司數</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number" id="totalPermits">0</div>
+                            <div class="stat-label">建照總數</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number" id="filteredPermits">0</div>
+                            <div class="stat-label">篩選結果</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number" id="lastUpdate">--</div>
+                            <div class="stat-label">最後更新</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="permitsContent">
+                    <div class="loading">
+                        <div class="spinner"></div>
+                        <p>載入中...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // 全域變數
+        let companies = [];
+        let allPermits = [];
+        let filteredPermits = [];
+        let selectedCompanies = new Set();
+        
+        // 初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            loadCompanies();
+            loadPermits();
+            
+            // 搜尋框事件
+            document.getElementById('companySearch').addEventListener('input', filterCompanyList);
+        });
+        
+        // 載入公司清單
+        async function loadCompanies() {
+            try {
+                // 這裡應該從 API 載入，暫時使用假資料
+                const response = await fetch('/api/baojia/companies');
+                const data = await response.json();
+                companies = data.companies || [];
+            } catch (error) {
+                // 使用預設資料
+                companies = [
+                    "寶佳建設", "寶誠建設", "寶欣建設", "佳瑞建設", "佳陞建設", "佳展建設",
+                    "佳泰建設", "佳群建設", "佳晟建設", "佳福建設", "佳昂建設", "佳茂建設",
+                    "佳順建設", "佳鋐建設", "佳鏵建設", "佳昕建設", "佳瓚建設", "佳友建設",
+                    "佳峻建設", "合遠建設", "合康建設", "合嘉建設", "合陽建設", "合新建設",
+                    "合謙建設", "合登建設", "合硯建設", "合雄建設", "合展建設", "合磊建設",
+                    "和峻建設", "和瑞建設", "和耀建設", "和毅建設", "和築建設", "和宜建設",
+                    "和洲建設", "和紘建設", "和發建設", "和境建設", "勝旺建設", "勝華建設",
+                    "勝麗建設", "勝美建設", "勝興建設", "勝發建設", "益欣建設", "益展建設",
+                    "益騏建設", "益翔建設", "鴻築建設", "鴻灃建設", "鴻廣建設", "鴻承建設",
+                    "協和建設", "協勝建設", "協閎建設", "櫻花建設", "誠佳建設", "傳佳建設",
+                    "興築建設", "鼎佳建設", "築禾建設", "泓瑞建設", "悅佳建設", "偉築建設",
+                    "皇普建設", "聚佳建設", "秉和建設", "新大建設", "富來建設", "昕暉建設",
+                    "弘峻建設", "鵬躍建設"
+                ];
+            }
+            
+            // 預設全選
+            selectedCompanies = new Set(companies);
+            
+            renderCompanyList();
+            updateStats();
+        }
+        
+        // 渲染公司清單
+        function renderCompanyList() {
+            const container = document.getElementById('companyList');
+            const searchTerm = document.getElementById('companySearch').value.toLowerCase();
+            
+            const filteredCompanies = companies.filter(company => 
+                company.toLowerCase().includes(searchTerm)
+            );
+            
+            container.innerHTML = filteredCompanies.map(company => `
+                <div class="checkbox-item">
+                    <input type="checkbox" id="company_${company}" value="${company}" 
+                           ${selectedCompanies.has(company) ? 'checked' : ''}
+                           onchange="toggleCompany('${company}')">
+                    <label for="company_${company}">${company}</label>
+                </div>
+            `).join('');
+            
+            document.getElementById('totalCompanies').textContent = companies.length;
+        }
+        
+        // 篩選公司清單
+        function filterCompanyList() {
+            renderCompanyList();
+        }
+        
+        // 切換公司選擇
+        function toggleCompany(company) {
+            if (selectedCompanies.has(company)) {
+                selectedCompanies.delete(company);
+            } else {
+                selectedCompanies.add(company);
+            }
+        }
+        
+        // 全選
+        function selectAll() {
+            selectedCompanies = new Set(companies);
+            renderCompanyList();
+        }
+        
+        // 全不選
+        function deselectAll() {
+            selectedCompanies.clear();
+            renderCompanyList();
+        }
+        
+        // 新增公司
+        async function addCompany() {
+            const input = document.getElementById('newCompany');
+            const companyName = input.value.trim();
+            
+            if (!companyName) {
+                alert('請輸入公司名稱');
+                return;
+            }
+            
+            if (companies.includes(companyName)) {
+                alert('公司已存在');
+                return;
+            }
+            
+            try {
+                // 這裡應該呼叫 API
+                // const response = await fetch('/api/baojia/companies', {
+                //     method: 'POST',
+                //     headers: { 'Content-Type': 'application/json' },
+                //     body: JSON.stringify({ company: companyName })
+                // });
+                
+                companies.push(companyName);
+                companies.sort();
+                selectedCompanies.add(companyName);
+                
+                input.value = '';
+                renderCompanyList();
+                
+                alert(`已新增: ${companyName}`);
+            } catch (error) {
+                alert('新增失敗: ' + error.message);
+            }
+        }
+        
+        // 載入建照資料
+        async function loadPermits() {
+            try {
+                // 這裡應該從 API 載入
+                // const response = await fetch('/api/permits');
+                // allPermits = await response.json();
+                
+                // 暫時使用假資料
+                allPermits = generateMockPermits();
+                
+                updateStats();
+                applyFilter();
+            } catch (error) {
+                console.error('載入建照資料失敗:', error);
+            }
+        }
+        
+        // 套用篩選
+        function applyFilter() {
+            const filterEnabled = document.getElementById('filterToggle').checked;
+            
+            if (!filterEnabled || selectedCompanies.size === 0) {
+                filteredPermits = [];
+            } else {
+                filteredPermits = allPermits.filter(permit => {
+                    const applicant = permit.applicantName || '';
+                    
+                    // 完全匹配
+                    if (selectedCompanies.has(applicant)) {
+                        return true;
+                    }
+                    
+                    // 智慧匹配
+                    for (const company of selectedCompanies) {
+                        if (smartMatch(applicant, company)) {
+                            return true;
+                        }
+                    }
+                    
+                    return false;
+                });
+            }
+            
+            renderPermits();
+            updateStats();
+        }
+        
+        // 智慧匹配
+        function smartMatch(applicant, company) {
+            const suffixes = ['股份有限公司', '有限公司', '建設股份有限公司', '營造股份有限公司', '營造有限公司'];
+            
+            let cleanApplicant = applicant;
+            let cleanCompany = company;
+            
+            suffixes.forEach(suffix => {
+                cleanApplicant = cleanApplicant.replace(suffix, '');
+                cleanCompany = cleanCompany.replace(suffix, '');
+            });
+            
+            cleanApplicant = cleanApplicant.trim();
+            cleanCompany = cleanCompany.trim();
+            
+            return cleanApplicant === cleanCompany || 
+                   cleanApplicant.includes(cleanCompany) || 
+                   cleanCompany.includes(cleanApplicant);
+        }
+        
+        // 渲染建照清單
+        function renderPermits() {
+            const container = document.getElementById('permitsContent');
+            
+            if (filteredPermits.length === 0) {
+                container.innerHTML = '<p style="text-align: center; padding: 40px; color: #666;">沒有符合條件的建照</p>';
+                return;
+            }
+            
+            container.innerHTML = `
+                <table class="permits-table">
+                    <thead>
+                        <tr>
+                            <th>建照號碼</th>
+                            <th>申請人</th>
+                            <th>建築地址</th>
+                            <th>樓層</th>
+                            <th>棟數</th>
+                            <th>戶數</th>
+                            <th>總樓地板面積</th>
+                            <th>發照日期</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${filteredPermits.map(permit => `
+                            <tr>
+                                <td>${permit.permitNumber || '-'}</td>
+                                <td>${permit.applicantName || '-'}</td>
+                                <td>${permit.constructionAddress || '-'}</td>
+                                <td>${permit.floors || '-'}</td>
+                                <td>${permit.buildings || '-'}</td>
+                                <td>${permit.units || '-'}</td>
+                                <td>${permit.totalFloorArea ? permit.totalFloorArea.toLocaleString() : '-'}</td>
+                                <td>${permit.issueDate || '-'}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+        }
+        
+        // 更新統計資料
+        function updateStats() {
+            document.getElementById('totalCompanies').textContent = companies.length;
+            document.getElementById('totalPermits').textContent = allPermits.length;
+            document.getElementById('filteredPermits').textContent = filteredPermits.length;
+            document.getElementById('lastUpdate').textContent = new Date().toLocaleDateString('zh-TW');
+        }
+        
+        // 產生假資料（測試用）
+        function generateMockPermits() {
+            const permits = [];
+            const sampleCompanies = Array.from(companies);
+            
+            for (let i = 0; i < 100; i++) {
+                const company = sampleCompanies[Math.floor(Math.random() * sampleCompanies.length)];
+                const year = 113 + Math.floor(Math.random() * 2);
+                
+                permits.push({
+                    permitNumber: `${year}中都建字第${String(i + 1).padStart(5, '0')}號`,
+                    applicantName: Math.random() > 0.3 ? company : company + '股份有限公司',
+                    constructionAddress: `台中市西屯區某某路${Math.floor(Math.random() * 999) + 1}號`,
+                    floors: Math.floor(Math.random() * 20) + 1,
+                    buildings: Math.floor(Math.random() * 5) + 1,
+                    units: Math.floor(Math.random() * 100) + 1,
+                    totalFloorArea: Math.floor(Math.random() * 10000) + 500,
+                    issueDate: `2024-${String(Math.floor(Math.random() * 12) + 1).padStart(2, '0')}-${String(Math.floor(Math.random() * 28) + 1).padStart(2, '0')}`
+                });
+            }
+            
+            return permits;
+        }
+    </script>
+</body>
+</html>

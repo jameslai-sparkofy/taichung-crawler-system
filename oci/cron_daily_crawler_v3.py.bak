@@ -1,0 +1,225 @@
+#!/usr/bin/env python3
+"""
+每日自動爬蟲 V3 - 從資料庫最新序號開始
+"""
+
+import sys
+import os
+import json
+import time
+import subprocess
+from datetime import datetime
+
+# 切換到正確的工作目錄
+os.chdir('/mnt/c/claude code/建照爬蟲/oci')
+
+# 添加路徑
+sys.path.append('/mnt/c/claude code/建照爬蟲/oci')
+
+# 載入爬蟲
+exec(open('optimized-crawler-stable.py').read().split('if __name__ == "__main__":')[0])
+
+def get_latest_sequence():
+    """從OCI獲取最新序號"""
+    try:
+        # 下載最新資料
+        cmd = [
+            "/home/laija/bin/oci", "os", "object", "get",
+            "--namespace", "nrsdi1rz5vl8",
+            "--bucket-name", "taichung-building-permits",
+            "--name", "data/permits.json",
+            "--file", "/tmp/current_permits.json"
+        ]
+        subprocess.run(cmd, capture_output=True)
+        
+        # 讀取並分析
+        with open('/tmp/current_permits.json', 'r') as f:
+            data = json.load(f)
+        
+        # 找出114年的最大序號
+        seq_114 = [p['sequenceNumber'] for p in data['permits'] if p.get('permitYear') == 114]
+        if seq_114:
+            latest_seq = max(seq_114)
+            print(f"📊 資料庫最新序號: {latest_seq}")
+            return latest_seq + 1  # 從下一個開始
+        else:
+            print("📊 資料庫無114年資料，從1開始")
+            return 1
+            
+    except Exception as e:
+        print(f"❌ 無法取得最新序號: {e}")
+        print("📊 使用預設序號: 1100")
+        return 1100
+
+def daily_crawl():
+    """每日爬蟲任務 - 從資料庫最新序號開始"""
+    
+    print(f"🕐 每日爬蟲 V3 開始: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+    print("=" * 60)
+    
+    # 獲取起始序號
+    year = 114
+    current_seq = get_latest_sequence()
+    
+    print(f"📊 開始爬取: {year}年 序號{current_seq}")
+    
+    # 創建爬蟲實例
+    crawler = OptimizedCrawler()
+    crawler.request_delay = 0.8
+    
+    # 記錄本次執行的統計
+    crawled_count = 0
+    success_count = 0
+    empty_count = 0
+    error_count = 0
+    batch_data = []
+    consecutive_empty = 0
+    
+    # 持續爬取直到遇到空白
+    while True:
+        index_key = f'{year}1{current_seq:05d}00'  # 注意：類型是1不是10
+        print(f'\n🔍 [{crawled_count + 1}] 爬取: {index_key}')
+        
+        result = crawler.crawl_single_permit(index_key)
+        crawled_count += 1
+        
+        if result and result != 'NO_DATA':
+            # 爬取成功
+            print(f'✅ 爬取成功!')
+            print(f'   建照號碼: {result.get("permitNumber")}')
+            print(f'   申請人: {result.get("applicantName")}')
+            print(f'   總樓地板面積: {result.get("totalFloorArea")}')
+            
+            success_count += 1
+            batch_data.append(result)
+            consecutive_empty = 0  # 重置連續空白計數
+            
+            # 每20筆上傳一次
+            if len(batch_data) >= 20:
+                print(f'\n💾 批次上傳 {len(batch_data)} 筆資料...')
+                success = crawler.upload_batch_data(batch_data)
+                if success:
+                    print('✅ 批次上傳成功!')
+                else:
+                    print('❌ 批次上傳失敗!')
+                batch_data = []
+            
+            # 繼續下一個序號
+            current_seq += 1
+            
+        elif result == 'NO_DATA':
+            # 此序號無資料（建照尚未發出）
+            print('⚠️ 此序號查無資料（建照尚未發出）')
+            empty_count += 1
+            consecutive_empty += 1
+            
+            if consecutive_empty >= 3:
+                # 連續3個序號都無資料，停止爬取
+                print(f'\n🏁 連續{consecutive_empty}個序號無資料，停止爬取')
+                print(f'📌 最後有效序號: {current_seq - consecutive_empty}')
+                break
+            else:
+                # 繼續嘗試下一個序號
+                current_seq += 1
+                
+        else:
+            # 爬取失敗（可能是網路問題或格式錯誤）
+            print(f'❌ 爬取失敗')
+            print(f'   返回值: {result}')
+            print(f'   可能原因: 網路問題、網站暫時無法訪問、或序號格式錯誤')
+            error_count += 1
+            
+            # 嘗試跳過這個序號
+            current_seq += 1
+            
+            # 如果錯誤太多，停止
+            if error_count >= 5:
+                print('\n❌ 錯誤次數過多，停止爬取')
+                break
+        
+        # 延遲避免被封鎖
+        time.sleep(crawler.request_delay)
+        
+        # 如果已爬取超過50筆，先停止（避免執行太久）
+        if crawled_count >= 50:
+            print('\n⏸️ 已爬取50筆，暫停執行')
+            break
+    
+    # 上傳剩餘的資料
+    if batch_data:
+        print(f'\n💾 上傳剩餘 {len(batch_data)} 筆資料...')
+        success = crawler.upload_batch_data(batch_data)
+        if success:
+            print('✅ 上傳成功!')
+        else:
+            print('❌ 上傳失敗!')
+    
+    # 更新執行記錄到OCI
+    update_crawl_logs(success_count, error_count, empty_count, current_seq - 1)
+    
+    # 顯示統計
+    print(f"\n📊 本次執行統計:")
+    print(f"   總爬取: {crawled_count} 筆")
+    print(f"   成功: {success_count} 筆")
+    print(f"   空白: {empty_count} 筆")
+    print(f"   錯誤: {error_count} 筆")
+    print(f"   最新序號: {current_seq - 1}")
+    
+    print(f"\n🕐 每日爬蟲 V3 結束: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+
+def update_crawl_logs(success_count, error_count, empty_count, last_sequence):
+    """更新執行記錄到OCI"""
+    try:
+        # 下載現有記錄
+        cmd = [
+            "/home/laija/bin/oci", "os", "object", "get",
+            "--namespace", "nrsdi1rz5vl8",
+            "--bucket-name", "taichung-building-permits",
+            "--name", "data/crawl-logs.json",
+            "--file", "/tmp/crawl_logs.json"
+        ]
+        subprocess.run(cmd, capture_output=True)
+        
+        with open('/tmp/crawl_logs.json', 'r') as f:
+            log_data = json.load(f)
+        
+        # 建立新記錄
+        now = datetime.now()
+        new_log = {
+            "date": now.strftime("%Y-%m-%d"),
+            "startTime": now.replace(second=0, microsecond=0).isoformat(),
+            "endTime": now.isoformat(),
+            "totalCrawled": success_count + error_count + empty_count,
+            "newRecords": success_count,
+            "errorRecords": error_count,
+            "status": "completed" if success_count > 0 else "partial",
+            "message": f"定時爬蟲V3執行 - 爬取至序號{last_sequence}，成功{success_count}筆"
+        }
+        
+        # 插入到最前面
+        log_data['logs'].insert(0, new_log)
+        
+        # 只保留最近50筆
+        log_data['logs'] = log_data['logs'][:50]
+        
+        # 儲存並上傳
+        with open('/tmp/crawl_logs_new.json', 'w') as f:
+            json.dump(log_data, f, ensure_ascii=False, indent=2)
+        
+        cmd = [
+            "/home/laija/bin/oci", "os", "object", "put",
+            "--namespace", "nrsdi1rz5vl8",
+            "--bucket-name", "taichung-building-permits",
+            "--name", "data/crawl-logs.json",
+            "--file", "/tmp/crawl_logs_new.json",
+            "--content-type", "application/json",
+            "--force"
+        ]
+        subprocess.run(cmd, capture_output=True)
+        print("✅ 執行記錄已更新到OCI")
+        
+    except Exception as e:
+        print(f"❌ 更新執行記錄失敗: {e}")
+
+if __name__ == "__main__":
+    daily_crawl()

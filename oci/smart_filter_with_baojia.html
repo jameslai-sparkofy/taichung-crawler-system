@@ -1,0 +1,787 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>台中市建照智慧篩選系統</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            background-color: #2c3e50;
+            color: white;
+            padding: 20px 0;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            text-align: center;
+            font-size: 28px;
+        }
+        
+        .filter-bar {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        
+        .filter-row {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .filter-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .search-input {
+            padding: 10px 15px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            min-width: 200px;
+        }
+        
+        .search-input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 5px rgba(52, 152, 219, 0.3);
+        }
+        
+        .checkbox-container {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            background-color: #f8f9fa;
+            border-radius: 6px;
+            border: 1px solid #e9ecef;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .checkbox-container:hover {
+            background-color: #e9ecef;
+        }
+        
+        .checkbox-container.active {
+            background-color: #e8f4fd;
+            border-color: #3498db;
+        }
+        
+        .checkbox-container input[type="checkbox"] {
+            margin: 0;
+            cursor: pointer;
+        }
+        
+        .checkbox-label {
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .btn-primary {
+            background-color: #3498db;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: #2980b9;
+            transform: translateY(-1px);
+        }
+        
+        .btn-success {
+            background-color: #27ae60;
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background-color: #229954;
+            transform: translateY(-1px);
+        }
+        
+        .btn-warning {
+            background-color: #f39c12;
+            color: white;
+        }
+        
+        .btn-warning:hover {
+            background-color: #e67e22;
+            transform: translateY(-1px);
+        }
+        
+        .btn-small {
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+        
+        .main-content {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .stats-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 6px;
+        }
+        
+        .stat-card {
+            text-align: center;
+            padding: 15px;
+            background-color: white;
+            border-radius: 6px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .stat-number {
+            font-size: 24px;
+            font-weight: bold;
+            color: #3498db;
+        }
+        
+        .stat-label {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+        }
+        
+        .permits-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        
+        .permits-table th,
+        .permits-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        .permits-table th {
+            background-color: #f8f9fa;
+            font-weight: 600;
+            color: #2c3e50;
+            position: sticky;
+            top: 0;
+        }
+        
+        .permits-table tr:hover {
+            background-color: #f8f9fa;
+        }
+        
+        .baojia-badge {
+            background-color: #e74c3c;
+            color: white;
+            padding: 2px 6px;
+            border-radius: 10px;
+            font-size: 10px;
+            font-weight: bold;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+        
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #3498db;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* 模態視窗樣式 */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+        
+        .modal-content {
+            background-color: white;
+            margin: 10% auto;
+            padding: 20px;
+            border-radius: 8px;
+            width: 80%;
+            max-width: 600px;
+            max-height: 70vh;
+            overflow-y: auto;
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        .close {
+            color: #aaa;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        
+        .close:hover {
+            color: #000;
+        }
+        
+        .company-input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .company-input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        
+        .company-list {
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid #e0e0e0;
+            border-radius: 4px;
+            padding: 10px;
+        }
+        
+        .company-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px;
+            margin-bottom: 5px;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+            transition: background-color 0.2s;
+        }
+        
+        .company-item:hover {
+            background-color: #e9ecef;
+        }
+        
+        .company-name {
+            font-size: 14px;
+        }
+        
+        @media (max-width: 768px) {
+            .filter-row {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .filter-group {
+                justify-content: center;
+            }
+            
+            .search-input {
+                min-width: auto;
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>🏢 台中市建照智慧篩選系統</h1>
+        </div>
+    </header>
+    
+    <div class="container">
+        <!-- 篩選控制區 -->
+        <div class="filter-bar">
+            <div class="filter-row">
+                <div class="filter-group">
+                    <input type="text" 
+                           id="smartSearch" 
+                           class="search-input" 
+                           placeholder="智慧搜尋建照資料（申請人、地址、建照號碼...）">
+                </div>
+                
+                <div class="filter-group">
+                    <div class="checkbox-container" id="baojiaCb">
+                        <input type="checkbox" id="baojiaFilter" onchange="toggleBaojiaFilter()">
+                        <label for="baojiaFilter" class="checkbox-label">🏗️ 只看寶佳機構</label>
+                    </div>
+                </div>
+                
+                <div class="filter-group">
+                    <button class="btn btn-warning" onclick="openBaojiaManger()">
+                        📝 寶佳名單
+                    </button>
+                </div>
+                
+                <div class="filter-group">
+                    <button class="btn btn-primary" onclick="applyFilters()">
+                        🔍 搜尋
+                    </button>
+                    
+                    <button class="btn btn-success btn-small" onclick="clearFilters()">
+                        🗑️ 清除
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 統計資料區 -->
+        <div class="main-content">
+            <div class="stats-section">
+                <div class="stat-card">
+                    <div class="stat-number" id="totalPermits">0</div>
+                    <div class="stat-label">建照總數</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="filteredPermits">0</div>
+                    <div class="stat-label">篩選結果</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="baojiaBuildingCount">0</div>
+                    <div class="stat-label">寶佳機構建案</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="lastUpdate">--</div>
+                    <div class="stat-label">最後更新</div>
+                </div>
+            </div>
+            
+            <!-- 建照清單區 -->
+            <div id="permitsContent">
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p>載入中...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 寶佳公司管理模態視窗 -->
+    <div id="baojiaMgmtModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>🏢 寶佳機構公司管理</h2>
+                <span class="close" onclick="closeBaojiaManger()">&times;</span>
+            </div>
+            
+            <div class="company-input-group">
+                <input type="text" 
+                       class="company-input" 
+                       id="newCompanyName" 
+                       placeholder="輸入新的寶佳體系公司名稱">
+                <button class="btn btn-primary" onclick="addBaojiCompany()">新增公司</button>
+            </div>
+            
+            <div class="company-list" id="baojiCompanyList">
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p>載入公司清單中...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // 全域變數
+        let allPermits = [];
+        let filteredPermits = [];
+        let baojiCompanies = [];
+        let isBaojiFilterEnabled = false;
+        
+        // 初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            loadBaojiCompanies();
+            loadPermits();
+            
+            // 綁定搜尋框事件
+            document.getElementById('smartSearch').addEventListener('input', debounce(applyFilters, 300));
+        });
+        
+        // 防抖函數
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
+        
+        // 載入寶佳公司清單
+        async function loadBaojiCompanies() {
+            try {
+                // 這裡應該從API載入，暫時使用靜態資料
+                baojiCompanies = [
+                    "寶佳建設", "寶誠建設", "寶欣建設", "佳瑞建設", "佳陞建設", "佳展建設",
+                    "佳泰建設", "佳群建設", "佳晟建設", "佳福建設", "佳昂建設", "佳茂建設",
+                    "佳順建設", "佳鋐建設", "佳鏵建設", "佳昕建設", "佳瓚建設", "佳友建設",
+                    "佳峻建設", "合遠建設", "合康建設", "合嘉建設", "合陽建設", "合新建設",
+                    "合謙建設", "合登建設", "合硯建設", "合雄建設", "合展建設", "合磊建設",
+                    "和峻建設", "和瑞建設", "和耀建設", "和毅建設", "和築建設", "和宜建設",
+                    "和洲建設", "和紘建設", "和發建設", "和境建設", "勝旺建設", "勝華建設",
+                    "勝麗建設", "勝美建設", "勝興建設", "勝發建設", "益欣建設", "益展建設",
+                    "益騏建設", "益翔建設", "鴻築建設", "鴻灃建設", "鴻廣建設", "鴻承建設",
+                    "協和建設", "協勝建設", "協閎建設", "櫻花建設", "誠佳建設", "傳佳建設",
+                    "興築建設", "鼎佳建設", "築禾建設", "泓瑞建設", "悅佳建設", "偉築建設",
+                    "皇普建設", "聚佳建設", "秉和建設", "新大建設", "富來建設", "昕暉建設",
+                    "弘峻建設", "鵬躍建設"
+                ];
+            } catch (error) {
+                console.error('載入寶佳公司清單失敗:', error);
+            }
+        }
+        
+        // 載入建照資料
+        async function loadPermits() {
+            try {
+                // 暫時使用假資料
+                allPermits = generateMockPermits();
+                updateStats();
+                applyFilters();
+            } catch (error) {
+                console.error('載入建照資料失敗:', error);
+            }
+        }
+        
+        // 切換寶佳篩選
+        function toggleBaojiaFilter() {
+            isBaojiFilterEnabled = document.getElementById('baojiaFilter').checked;
+            const container = document.getElementById('baojiaCb');
+            
+            if (isBaojiFilterEnabled) {
+                container.classList.add('active');
+            } else {
+                container.classList.remove('active');
+            }
+            
+            applyFilters();
+        }
+        
+        // 套用篩選條件
+        function applyFilters() {
+            const searchTerm = document.getElementById('smartSearch').value.toLowerCase().trim();
+            
+            filteredPermits = allPermits.filter(permit => {
+                // 寶佳篩選
+                if (isBaojiFilterEnabled && !isBaojiCompany(permit.applicantName)) {
+                    return false;
+                }
+                
+                // 智慧搜尋
+                if (searchTerm) {
+                    const searchableText = [
+                        permit.permitNumber,
+                        permit.applicantName,
+                        permit.constructionAddress,
+                        permit.projectName
+                    ].join(' ').toLowerCase();
+                    
+                    if (!searchableText.includes(searchTerm)) {
+                        return false;
+                    }
+                }
+                
+                return true;
+            });
+            
+            renderPermits();
+            updateStats();
+        }
+        
+        // 判斷是否為寶佳機構
+        function isBaojiCompany(applicantName) {
+            if (!applicantName) return false;
+            
+            // 完全匹配
+            if (baojiCompanies.includes(applicantName)) {
+                return true;
+            }
+            
+            // 智慧匹配
+            const suffixes = ['股份有限公司', '有限公司', '建設股份有限公司', '營造股份有限公司', '營造有限公司'];
+            let cleanApplicant = applicantName;
+            
+            for (const suffix of suffixes) {
+                cleanApplicant = cleanApplicant.replace(suffix, '');
+            }
+            cleanApplicant = cleanApplicant.trim();
+            
+            for (const company of baojiCompanies) {
+                let cleanCompany = company;
+                for (const suffix of suffixes) {
+                    cleanCompany = cleanCompany.replace(suffix, '');
+                }
+                cleanCompany = cleanCompany.trim();
+                
+                if (cleanApplicant === cleanCompany) {
+                    return true;
+                }
+                
+                // 寶佳相關變體
+                if (company.includes('寶佳') && applicantName.includes('寶佳') && !applicantName.includes('非')) {
+                    return true;
+                }
+            }
+            
+            return false;
+        }
+        
+        // 渲染建照清單
+        function renderPermits() {
+            const container = document.getElementById('permitsContent');
+            
+            if (filteredPermits.length === 0) {
+                container.innerHTML = '<p style="text-align: center; padding: 40px; color: #666;">沒有符合條件的建照</p>';
+                return;
+            }
+            
+            container.innerHTML = `
+                <table class="permits-table">
+                    <thead>
+                        <tr>
+                            <th>建照號碼</th>
+                            <th>申請人</th>
+                            <th>建築地址</th>
+                            <th>樓層</th>
+                            <th>棟數</th>
+                            <th>戶數</th>
+                            <th>總樓地板面積</th>
+                            <th>發照日期</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${filteredPermits.map(permit => {
+                            const isBaojia = isBaojiCompany(permit.applicantName);
+                            return `
+                                <tr>
+                                    <td>${permit.permitNumber || '-'}</td>
+                                    <td>
+                                        ${permit.applicantName || '-'}
+                                        ${isBaojia ? '<span class="baojia-badge">寶佳</span>' : ''}
+                                    </td>
+                                    <td>${permit.constructionAddress || '-'}</td>
+                                    <td>${permit.floors || '-'}</td>
+                                    <td>${permit.buildings || '-'}</td>
+                                    <td>${permit.units || '-'}</td>
+                                    <td>${permit.totalFloorArea ? permit.totalFloorArea.toLocaleString() : '-'}</td>
+                                    <td>${permit.issueDate || '-'}</td>
+                                </tr>
+                            `;
+                        }).join('')}
+                    </tbody>
+                </table>
+            `;
+        }
+        
+        // 更新統計資料
+        function updateStats() {
+            const baojiCount = allPermits.filter(permit => isBaojiCompany(permit.applicantName)).length;
+            
+            document.getElementById('totalPermits').textContent = allPermits.length;
+            document.getElementById('filteredPermits').textContent = filteredPermits.length;
+            document.getElementById('baojiaBuildingCount').textContent = baojiCount;
+            document.getElementById('lastUpdate').textContent = new Date().toLocaleDateString('zh-TW');
+        }
+        
+        // 清除篩選條件
+        function clearFilters() {
+            document.getElementById('smartSearch').value = '';
+            document.getElementById('baojiaFilter').checked = false;
+            isBaojiFilterEnabled = false;
+            document.getElementById('baojiaCb').classList.remove('active');
+            applyFilters();
+        }
+        
+        // 開啟寶佳公司管理視窗
+        function openBaojiaManger() {
+            document.getElementById('baojiaMgmtModal').style.display = 'block';
+            renderBaojiCompanyList();
+        }
+        
+        // 關閉寶佳公司管理視窗
+        function closeBaojiaManger() {
+            document.getElementById('baojiaMgmtModal').style.display = 'none';
+        }
+        
+        // 渲染寶佳公司清單
+        function renderBaojiCompanyList() {
+            const container = document.getElementById('baojiCompanyList');
+            
+            container.innerHTML = baojiCompanies.map(company => `
+                <div class="company-item">
+                    <span class="company-name">${company}</span>
+                    <button class="btn btn-primary btn-small" onclick="removeBaojiCompany('${company}')">
+                        刪除
+                    </button>
+                </div>
+            `).join('');
+        }
+        
+        // 新增寶佳公司
+        async function addBaojiCompany() {
+            const input = document.getElementById('newCompanyName');
+            const companyName = input.value.trim();
+            
+            if (!companyName) {
+                alert('請輸入公司名稱');
+                return;
+            }
+            
+            if (baojiCompanies.includes(companyName)) {
+                alert('公司已存在');
+                return;
+            }
+            
+            try {
+                baojiCompanies.push(companyName);
+                baojiCompanies.sort();
+                
+                input.value = '';
+                renderBaojiCompanyList();
+                applyFilters(); // 重新篩選以更新結果
+                
+                alert(`已新增: ${companyName}`);
+                
+                // 這裡應該呼叫API同步到伺服器
+                // await fetch('/api/baojia/companies/sync', {
+                //     method: 'POST',
+                //     headers: { 'Content-Type': 'application/json' },
+                //     body: JSON.stringify({ action: 'add', company: companyName })
+                // });
+                
+            } catch (error) {
+                alert('新增失敗: ' + error.message);
+            }
+        }
+        
+        // 刪除寶佳公司
+        async function removeBaojiCompany(companyName) {
+            if (!confirm(`確定要刪除 "${companyName}" 嗎？`)) {
+                return;
+            }
+            
+            try {
+                const index = baojiCompanies.indexOf(companyName);
+                if (index > -1) {
+                    baojiCompanies.splice(index, 1);
+                    renderBaojiCompanyList();
+                    applyFilters(); // 重新篩選以更新結果
+                    
+                    alert(`已刪除: ${companyName}`);
+                    
+                    // 這裡應該呼叫API同步到伺服器
+                    // await fetch('/api/baojia/companies/sync', {
+                    //     method: 'POST',
+                    //     headers: { 'Content-Type': 'application/json' },
+                    //     body: JSON.stringify({ action: 'remove', company: companyName })
+                    // });
+                }
+            } catch (error) {
+                alert('刪除失敗: ' + error.message);
+            }
+        }
+        
+        // 點擊模態視窗外部關閉
+        window.onclick = function(event) {
+            const modal = document.getElementById('baojiaMgmtModal');
+            if (event.target === modal) {
+                closeBaojiaManger();
+            }
+        }
+        
+        // 產生假資料（測試用）
+        function generateMockPermits() {
+            const permits = [];
+            const sampleCompanies = [
+                '勝發建設股份有限公司', '寶佳建設', '合遠建設有限公司', '台積電', '中華電信',
+                '佳瑞建設', '泓瑞建設', '勝華建設', '和瑞建設', '富邦建設', '遠雄建設',
+                '國泰建設', '興富發建設', '長虹建設', '太子建設'
+            ];
+            
+            for (let i = 0; i < 200; i++) {
+                const company = sampleCompanies[Math.floor(Math.random() * sampleCompanies.length)];
+                const year = 113 + Math.floor(Math.random() * 2);
+                
+                permits.push({
+                    permitNumber: `${year}中都建字第${String(i + 1).padStart(5, '0')}號`,
+                    applicantName: company,
+                    constructionAddress: `台中市西屯區某某路${Math.floor(Math.random() * 999) + 1}號`,
+                    floors: Math.floor(Math.random() * 20) + 1,
+                    buildings: Math.floor(Math.random() * 5) + 1,
+                    units: Math.floor(Math.random() * 100) + 1,
+                    totalFloorArea: Math.floor(Math.random() * 10000) + 500,
+                    issueDate: `2024-${String(Math.floor(Math.random() * 12) + 1).padStart(2, '0')}-${String(Math.floor(Math.random() * 28) + 1).padStart(2, '0')}`
+                });
+            }
+            
+            return permits;
+        }
+    </script>
+</body>
+</html>
