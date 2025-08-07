@@ -1,0 +1,32 @@
+name = "taichung-permits-crawler"
+compatibility_date = "2025-01-31"
+main = "src/index.js"
+
+# CRON 觸發器
+[triggers]
+crons = ["39 10 * * *", "25 22 * * *"]  # 測試: UTC 10:39, 正式: UTC 22:25 (台灣時間 6:25)
+
+# 環境變數
+[vars]
+ENVIRONMENT = "production"
+START_YEAR = "114"
+CRAWL_TYPE = "1"
+MAX_CONSECUTIVE_FAILURES = "5"
+MAX_CONSECUTIVE_NO_DATA = "20"
+BATCH_SIZE = "30"
+REQUEST_DELAY_MS = "800"
+MAX_CRAWL_PER_RUN = "50"
+
+# OCI 設定
+OCI_NAMESPACE = "nrsdi1rz5vl8"
+OCI_BUCKET = "taichung-building-permits"
+OCI_REGION = "ap-tokyo-1"
+
+# OCI 預驗證金鑰
+OCI_PREAUTH_KEY = "P4-4FVql_6vPAHVqX7JZxDbS15B34gCaGE-ta0BgOjAVPxkUrre9ZpYbtUZHneKO"
+
+# 這些是完整 OCI API 版本需要的（目前使用預驗證請求，不需要這些）
+# OCI_TENANCY_ID = "your-tenancy-id"
+# OCI_USER_ID = "your-user-id"
+# OCI_FINGERPRINT = "your-key-fingerprint"
+# OCI_PRIVATE_KEY = "your-private-key"

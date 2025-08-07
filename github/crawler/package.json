@@ -1,0 +1,23 @@
+{
+  "name": "taichung-building-permits-crawler",
+  "version": "1.0.0",
+  "description": "台中市建照資料爬蟲 - GitHub Actions版本",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "test": "node test.js"
+  },
+  "dependencies": {
+    "axios": "^1.6.0",
+    "cheerio": "^1.0.0-rc.12",
+    "fs-extra": "^11.1.1"
+  },
+  "keywords": [
+    "crawler",
+    "building-permits",
+    "taichung",
+    "github-actions"
+  ],
+  "author": "Your Name",
+  "license": "MIT"
+}

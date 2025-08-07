@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>台中市建照資料同步系統 - 示範</title>
+    <style>
+        * { 
+            margin: 0; 
+            padding: 0; 
+            box-sizing: border-box; 
+        }
+        
+        body { 
+            font-family: 'Segoe UI', 'Microsoft JhengHei', Arial, sans-serif; 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+        
+        .container { 
+            max-width: 1400px; 
+            margin: 0 auto; 
+            background: white; 
+            border-radius: 15px; 
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header { 
+            background: linear-gradient(135deg, #2196F3, #21CBF3); 
+            color: white; 
+            padding: 40px; 
+            text-align: center; 
+            position: relative;
+        }
+        
+        .header h1 { 
+            font-size: 3em; 
+            margin-bottom: 15px; 
+        }
+        
+        .header p { 
+            opacity: 0.9; 
+            font-size: 1.3em; 
+        }
+        
+        .stats-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); 
+            gap: 25px; 
+            padding: 40px; 
+        }
+        
+        .stat-card { 
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); 
+            padding: 30px; 
+            border-radius: 15px; 
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        
+        .stat-card:hover { 
+            transform: translateY(-8px); 
+            box-shadow: 0 15px 30px rgba(33, 150, 243, 0.3);
+        }
+        
+        .stat-number { 
+            font-size: 3em; 
+            font-weight: bold; 
+            color: #2196F3; 
+            margin-bottom: 15px; 
+        }
+        
+        .stat-label { 
+            color: #666; 
+            font-size: 1.2em; 
+            font-weight: 500;
+        }
+        
+        .content-section { 
+            padding: 40px; 
+            border-top: 1px solid #eee; 
+        }
+        
+        .section-title { 
+            font-size: 2em; 
+            margin-bottom: 25px; 
+            color: #333; 
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .log-item { 
+            background: #f8f9fa; 
+            padding: 20px; 
+            margin-bottom: 15px; 
+            border-radius: 10px; 
+            border-left: 5px solid #2196F3; 
+        }
+        
+        .log-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .log-date { 
+            font-weight: bold; 
+            color: #2196F3; 
+            font-size: 1.1em;
+        }
+        
+        .log-status { 
+            display: inline-block; 
+            padding: 6px 12px; 
+            border-radius: 20px; 
+            font-size: 0.9em; 
+            font-weight: 500;
+            background: #d4edda; 
+            color: #155724; 
+        }
+        
+        .log-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 10px;
+        }
+        
+        .log-stat {
+            text-align: center;
+            padding: 10px;
+            background: white;
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
+        }
+        
+        .log-stat-number {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .log-stat-label {
+            font-size: 0.9em;
+            color: #666;
+        }
+        
+        .table-container {
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            margin-top: 20px;
+        }
+        
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .table th {
+            background: #2196F3;
+            color: white;
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+        }
+        
+        .table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .table tr:hover {
+            background: #f5f5f5;
+        }
+        
+        .btn {
+            background: #2196F3;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            margin-bottom: 20px;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .btn:hover {
+            background: #1976D2;
+        }
+
+        .demo-note {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            color: #856404;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 { font-size: 2em; }
+            .stats-grid { grid-template-columns: 1fr; padding: 20px; }
+            .content-section { padding: 20px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏗️ 台中市建照資料同步系統</h1>
+            <p>即時監控建築執照資料爬取狀態 | 示範版本</p>
+        </div>
+        
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-number">10</div>
+                <div class="stat-label">📊 總建照數量</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">10</div>
+                <div class="stat-label">🆕 今日新增</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">剛剛</div>
+                <div class="stat-label">🕒 最後更新</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">✅ 正常</div>
+                <div class="stat-label">⚡ 系統狀態</div>
+            </div>
+        </div>
+        
+        <div class="content-section">
+            <div class="demo-note">
+                📝 <strong>示範說明：</strong>這是包含10筆測試建照資料的示範頁面。實際部署到GitHub後，系統會每天自動爬取真實資料。
+            </div>
+            
+            <h2 class="section-title">📋 爬取記錄</h2>
+            
+            <div class="log-item">
+                <div class="log-header">
+                    <div class="log-date">2025-01-27</div>
+                    <span class="log-status">完成</span>
+                </div>
+                <div class="log-stats">
+                    <div class="log-stat">
+                        <div class="log-stat-number">10</div>
+                        <div class="log-stat-label">總爬取</div>
+                    </div>
+                    <div class="log-stat">
+                        <div class="log-stat-number">10</div>
+                        <div class="log-stat-label">新增</div>
+                    </div>
+                    <div class="log-stat">
+                        <div class="log-stat-number">0</div>
+                        <div class="log-stat-label">錯誤</div>
+                    </div>
+                    <div class="log-stat">
+                        <div class="log-stat-number">315秒</div>
+                        <div class="log-stat-label">執行時間</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="log-item">
+                <div class="log-header">
+                    <div class="log-date">2025-01-26</div>
+                    <span class="log-status">完成</span>
+                </div>
+                <div class="log-stats">
+                    <div class="log-stat">
+                        <div class="log-stat-number">8</div>
+                        <div class="log-stat-label">總爬取</div>
+                    </div>
+                    <div class="log-stat">
+                        <div class="log-stat-number">5</div>
+                        <div class="log-stat-label">新增</div>
+                    </div>
+                    <div class="log-stat">
+                        <div class="log-stat-number">3</div>
+                        <div class="log-stat-label">錯誤</div>
+                    </div>
+                    <div class="log-stat">
+                        <div class="log-stat-number">210秒</div>
+                        <div class="log-stat-label">執行時間</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="content-section">
+            <h2 class="section-title">📄 最新建照資料</h2>
+            
+            <div class="table-container">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>建照號碼</th>
+                            <th>年份</th>
+                            <th>起造人</th>
+                            <th>基地地址</th>
+                            <th>基地面積</th>
+                            <th>爬取時間</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>114中建字第00001號</td>
+                            <td>114</td>
+                            <td>王小明</td>
+                            <td>台中市鹿區福成段219-4地號 等1筆</td>
+                            <td>204.9 m²</td>
+                            <td>2025/1/27 上午8:15:30</td>
+                        </tr>
+                        <tr>
+                            <td>114中建字第00002號</td>
+                            <td>114</td>
+                            <td>劉建設股份有限公司</td>
+                            <td>台中市西屯區逢甲段512-3地號</td>
+                            <td>156.8 m²</td>
+                            <td>2025/1/27 上午8:16:00</td>
+                        </tr>
+                        <tr>
+                            <td>114中建字第00003號</td>
+                            <td>114</td>
+                            <td>台中建設開發股份有限公司</td>
+                            <td>台中市南屯區田心段123-5地號 等2筆</td>
+                            <td>298.4 m²</td>
+                            <td>2025/1/27 上午8:16:30</td>
+                        </tr>
+                        <tr>
+                            <td>114中建字第00004號</td>
+                            <td>114</td>
+                            <td>豐邑建設股份有限公司</td>
+                            <td>台中市北屯區松竹段67-8地號</td>
+                            <td>425.6 m²</td>
+                            <td>2025/1/27 上午8:17:00</td>
+                        </tr>
+                        <tr>
+                            <td>114中建字第00005號</td>
+                            <td>114</td>
+                            <td>精銳建設股份有限公司</td>
+                            <td>台中市西區向上段89-12地號 等3筆</td>
+                            <td>678.9 m²</td>
+                            <td>2025/1/27 上午8:17:30</td>
+                        </tr>
+                        <tr>
+                            <td>114中建字第00006號</td>
+                            <td>114</td>
+                            <td>遠雄建設股份有限公司</td>
+                            <td>台中市南區忠明段456-7地號</td>
+                            <td>234.5 m²</td>
+                            <td>2025/1/27 上午8:18:00</td>
+                        </tr>
+                        <tr>
+                            <td>114中建字第00007號</td>
+                            <td>114</td>
+                            <td>鄉林建設股份有限公司</td>
+                            <td>台中市北區健行段321-9地號 等4筆</td>
+                            <td>892.3 m²</td>
+                            <td>2025/1/27 上午8:18:30</td>
+                        </tr>
+                        <tr>
+                            <td>114中建字第00008號</td>
+                            <td>114</td>
+                            <td>麗寶建設股份有限公司</td>
+                            <td>台中市東區東光段78-11地號</td>
+                            <td>167.2 m²</td>
+                            <td>2025/1/27 上午8:19:00</td>
+                        </tr>
+                        <tr>
+                            <td>114中建字第00009號</td>
+                            <td>114</td>
+                            <td>佳福建設股份有限公司</td>
+                            <td>台中市中區成功段654-2地號 等2筆</td>
+                            <td>345.7 m²</td>
+                            <td>2025/1/27 上午8:19:30</td>
+                        </tr>
+                        <tr>
+                            <td>114中建字第00010號</td>
+                            <td>114</td>
+                            <td>國泰建設股份有限公司</td>
+                            <td>台中市太平區頭汴段987-6地號 等5筆</td>
+                            <td>567.1 m²</td>
+                            <td>2025/1/27 上午8:20:00</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div style="margin-top: 30px; padding: 20px; background: #e8f4fd; border-radius: 10px; border-left: 5px solid #2196F3;">
+                <h3 style="color: #1976D2; margin-bottom: 10px;">🔗 CRM 系統串接範例</h3>
+                <p style="margin-bottom: 10px;"><strong>JSON API 網址：</strong></p>
+                <code style="background: #f5f5f5; padding: 8px; border-radius: 4px; display: block; margin-bottom: 15px;">
+                    https://your-username.github.io/your-repo-name/data/permits.json
+                </code>
+                <p style="margin-bottom: 10px;"><strong>JavaScript 串接範例：</strong></p>
+                <pre style="background: #f5f5f5; padding: 15px; border-radius: 8px; overflow-x: auto; font-size: 0.9em;"><code>// 獲取最新建照資料
+const response = await fetch('https://username.github.io/repo/data/permits.json');
+const data = await response.json();
+
+// 處理資料
+data.permits.forEach(permit => {
+  console.log(`建照: ${permit.permitNumber}`);
+  console.log(`起造人: ${permit.applicantName}`);
+  console.log(`基地面積: ${permit.siteArea} m²`);
+  
+  // 同步到你的CRM系統
+  syncToCRM(permit);
+});</code></pre>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

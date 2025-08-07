@@ -1,0 +1,85 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+*.txt
+
+# Temporary files
+/tmp/
+*.tmp
+*.temp
+
+# Local data files
+/oci/backups/
+/oci/old_json_backup/
+*.json.bak
+permits_backup_*.json
+
+# Cookie and temp files
+/tmp/cookie_*.txt
+/tmp/page_*.html
+
+# Node modules (if any)
+node_modules/
+
+# Sensitive files
+*.key
+*.pem
+config.ini
+secrets.json
+
+# Build files
+dist/
+build/
+*.tar.gz
+
+# OCI specific temporary files
+server.pid
+crawler.log
+crawl_*.log
+fix_*.log
+restart_*.log
+recrawl_*.log
+fill_*.log
+main_crawler_*.log
+smart_worker_*.log
+worker_*.log
+cron_*.log
+
+# Keep important config files but ignore logs
+!CLAUDE.md
+!README.md
+!*.py
+!*.html
+!*.json
+!*.sh
+!*.md
+
+# But ignore these specific large/temp JSON files
+all_permits.json
+backup_*.json
+permits.json
+crawl-test-results.json
+multi-year-test-results.json
+permits_*.json
+backup_latest.json

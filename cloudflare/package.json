@@ -1,0 +1,24 @@
+{
+  "name": "taichung-permits-crawler",
+  "version": "2.0.0",
+  "description": "台中市建照爬蟲系統 - Cloudflare Workers + OCI Storage",
+  "main": "src/index.js",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "tail": "wrangler tail",
+    "test": "wrangler dev --local"
+  },
+  "keywords": [
+    "crawler",
+    "building-permits",
+    "taichung",
+    "cloudflare-workers",
+    "oci-storage"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "wrangler": "^3.0.0"
+  }
+}

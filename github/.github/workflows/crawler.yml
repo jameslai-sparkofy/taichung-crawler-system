@@ -1,0 +1,47 @@
+name: 台中市建照資料爬蟲
+
+on:
+  schedule:
+    # 每天早上8點執行 (UTC時間，台灣時間需要-8小時)
+    - cron: '0 0 * * *'  # UTC 00:00 = 台灣時間 08:00
+  workflow_dispatch:  # 允許手動觸發
+  push:
+    branches: [ main ]  # 推送到main分支時也執行
+
+jobs:
+  crawl:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        
+    - name: Install dependencies
+      run: |
+        cd crawler
+        npm install
+        
+    - name: Run crawler
+      run: |
+        cd crawler
+        node index.js
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        
+    - name: Update data files
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git add data/
+        git add docs/
+        if ! git diff --staged --quiet; then
+          git commit -m "🤖 自動更新建照資料 $(date +'%Y-%m-%d %H:%M:%S')"
+          git push
+        else
+          echo "沒有資料變更"
+        fi

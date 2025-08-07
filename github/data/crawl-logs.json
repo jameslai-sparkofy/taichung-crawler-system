@@ -1,0 +1,82 @@
+{
+  "logs": [
+    {
+      "timestamp": "2025-07-30T07:28:46.154509",
+      "action": "sync_from_oci",
+      "totalCount": 5214,
+      "yearCounts": {
+        "114": 977,
+        "113": 2200,
+        "112": 2037
+      },
+      "message": "從 OCI 備份同步資料"
+    },
+    {
+      "timestamp": "2025-07-28T21:42:40.116113",
+      "action": "sync_from_oci",
+      "totalCount": 5214,
+      "yearCounts": {
+        "114": 977,
+        "113": 2200,
+        "112": 2037
+      },
+      "message": "從 OCI 備份同步資料"
+    },
+    {
+      "timestamp": "2025-07-28T12:56:29.472749",
+      "action": "sync_from_oci",
+      "totalCount": 4555,
+      "yearCounts": {
+        "114": 947,
+        "113": 2112,
+        "112": 1496
+      },
+      "message": "從 OCI 備份同步資料"
+    },
+    {
+      "date": "2025-01-27",
+      "startTime": "2025-01-27T00:15:00.000Z",
+      "endTime": "2025-01-27T00:20:15.000Z",
+      "totalCrawled": 10,
+      "newRecords": 10,
+      "errorRecords": 0,
+      "status": "completed"
+    },
+    {
+      "date": "2025-01-26",
+      "startTime": "2025-01-26T00:15:00.000Z",
+      "endTime": "2025-01-26T00:18:30.000Z",
+      "totalCrawled": 8,
+      "newRecords": 5,
+      "errorRecords": 3,
+      "status": "completed"
+    },
+    {
+      "date": "2025-01-25",
+      "startTime": "2025-01-25T00:15:00.000Z",
+      "endTime": "2025-01-25T00:17:45.000Z",
+      "totalCrawled": 12,
+      "newRecords": 8,
+      "errorRecords": 4,
+      "status": "completed"
+    },
+    {
+      "date": "2025-01-24",
+      "startTime": "2025-01-24T00:15:00.000Z",
+      "endTime": "2025-01-24T00:16:20.000Z",
+      "totalCrawled": 6,
+      "newRecords": 3,
+      "errorRecords": 3,
+      "status": "completed"
+    },
+    {
+      "date": "2025-01-23",
+      "startTime": "2025-01-23T00:15:00.000Z",
+      "endTime": "2025-01-23T00:25:10.000Z",
+      "totalCrawled": 15,
+      "newRecords": 12,
+      "errorRecords": 3,
+      "status": "completed"
+    }
+  ]
+}
