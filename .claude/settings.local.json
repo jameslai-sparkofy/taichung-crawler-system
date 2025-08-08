@@ -188,7 +188,8 @@
       "Bash(sudo apt install:*)",
       "Bash(/home/laija/bin/oci os object get --namespace nrsdi1rz5vl8 --bucket-name taichung-building-permits --name permits.json --file /tmp/current_permits.json)",
       "Bash(/home/laija/bin/oci os object get --namespace nrsdi1rz5vl8 --bucket-name taichung-building-permits --name permits.json --file /tmp/latest_permits.json)",
-      "Bash(git remote add:*)"
+      "Bash(git remote add:*)",
+      "Bash(cd:*)"
     ],
     "deny": []
   }
